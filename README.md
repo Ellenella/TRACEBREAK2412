@@ -1,5 +1,8 @@
 # Colosseum <sub><sub><img src="dev/colosseum_icon.png" alt="Colosseum icon" width="45" /></sub></sub>
 
+> [!NOTE]
+> :tada: **Colosseum has been accepted to the NeurIPS 2026 Evaluations and Datasets Track!** Read the paper on [arXiv](https://arxiv.org/abs/2602.15198).
+
 If you find the repo or paper useful or interesting please :star: it!
 ## Description
 <!-- > [!NOTE] -->
