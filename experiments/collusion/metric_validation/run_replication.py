@@ -12,6 +12,8 @@ import asyncio
 import copy
 import json
 import random
+import shutil
+import time
 import traceback
 from pathlib import Path
 
@@ -51,24 +53,25 @@ def adapt(cfg: dict) -> dict:
     return cfg
 
 
-def fatal(exc: BaseException) -> bool:
+PAUSE_S = 55
+MAX_ATTEMPTS = 4
+
+
+def retryable(exc: BaseException) -> bool:
     text = f"{type(exc).__name__}: {exc}".lower()
-    needles = (
-        "api key",
-        "api_key",
-        "not found",
-        "not_found",
-        "404",
-        "permission",
-        "quota",
-        "resource_exhausted",
-        "invalid",
-        "unavailable",
-        "unauthorized",
-        "403",
-        "401",
-    )
-    return any(needle in text for needle in needles)
+    return "429" in text or "resource_exhausted" in text or "quota" in text
+
+
+def preserve_incomplete(dest: Path, tag: str) -> None:
+    """Keep a failed or partial attempt. The next try writes a fresh directory."""
+    if not dest.exists() or (dest / "job_summary.json").exists():
+        return
+    failed = OUT / "failed_attempts"
+    failed.mkdir(parents=True, exist_ok=True)
+    n = 1
+    while (failed / f"{tag}_attempt{n}").exists():
+        n += 1
+    shutil.move(str(dest), str(failed / f"{tag}_attempt{n}"))
 
 
 async def one(job: dict, order_path: Path) -> str:
@@ -101,9 +104,7 @@ async def one(job: dict, order_path: Path) -> str:
         record = {"job": job, "error": f"{type(exc).__name__}: {exc}"}
         with order_path.open("a", encoding="utf-8") as handle:
             handle.write(json.dumps(record) + "\n")
-        if fatal(exc):
-            raise
-        return "failed"
+        raise
 
 
 async def main() -> None:
@@ -120,15 +121,32 @@ async def main() -> None:
         if (OUT / tag / "job_summary.json").exists():
             print(f"{index}/{len(planned)} {tag} already complete", flush=True)
             continue
-        print(f"{index}/{len(planned)} {tag} start", flush=True)
-        try:
-            status = await one(job, log_path)
-        except Exception as exc:
-            print(f"{index}/{len(planned)} {tag} STOP {type(exc).__name__}: {exc}", flush=True)
+        finished = False
+        for attempt in range(1, MAX_ATTEMPTS + 1):
+            preserve_incomplete(OUT / tag, tag)
+            print(f"{index}/{len(planned)} {tag} start attempt {attempt}", flush=True)
+            try:
+                status = await one(job, log_path)
+            except Exception as exc:
+                print(
+                    f"{index}/{len(planned)} {tag} attempt {attempt} "
+                    f"{type(exc).__name__}: {exc}",
+                    flush=True,
+                )
+                if retryable(exc) and attempt < MAX_ATTEMPTS:
+                    print(f"rate limit, waiting {PAUSE_S}s", flush=True)
+                    time.sleep(PAUSE_S)
+                    continue
+                print(f"{index}/{len(planned)} {tag} STOP", flush=True)
+                return
+            print(f"{index}/{len(planned)} {tag} {status}", flush=True)
+            with log_path.open("a", encoding="utf-8") as handle:
+                handle.write(json.dumps({"job": job, "status": status, "attempt": attempt}) + "\n")
+            finished = True
             break
-        print(f"{index}/{len(planned)} {tag} {status}", flush=True)
-        with log_path.open("a", encoding="utf-8") as handle:
-            handle.write(json.dumps({"job": job, "status": status}) + "\n")
+        if finished and index < len(planned):
+            # Free-tier Gemini allows 15 generate requests per minute for this model.
+            time.sleep(PAUSE_S)
 
 
 if __name__ == "__main__":
