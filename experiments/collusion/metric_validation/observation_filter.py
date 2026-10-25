@@ -203,6 +203,7 @@ class FilteringClient(AbstractClient):
             "tasks_canonicalised": 0,
             "actions_restored": 0,
         }
+        self.sent_requests: List[Dict[str, Any]] = []
 
     @property
     def target_agent_name(self) -> str:
@@ -258,13 +259,24 @@ class FilteringClient(AbstractClient):
 
         tools = params.get("tools")
         if self._policy.block_post_message and tools is not None:
-            kept = [t for t in tools if not _tool_name(t) == "post_message"]
+            kept = [t for t in tools if _tool_name(t) != "post_message"]
             if len(kept) != len(list(tools)):
                 params["tools"] = kept
                 for item in _iter_text_bearers(input):
                     if "Planning Phase" in item.text and "post_message" in item.text:
                         item.replace(_POST_MESSAGE_HINT.sub(TOOLS_BLOCKED_NOTE, item.text))
 
+        texts = [slot.text for slot in _iter_text_bearers(input)]
+        self.sent_requests.append(
+            {
+                "agent": self._agent_name,
+                "model": params.get("model"),
+                "temperature": params.get("temperature"),
+                "max_tokens": params.get("max_tokens"),
+                "tool_names": [_tool_name(tool) for tool in (params.get("tools") or [])],
+                "texts": texts,
+            }
+        )
         return self._inner.generate_response(input, params)
 
 

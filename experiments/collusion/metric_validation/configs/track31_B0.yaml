@@ -1,0 +1,56 @@
+# Track 3.1 condition b0: cooperative baseline - coalition objective and filter both absent
+#
+# Built on hackathon_2_1_b_pair_no_channel.yaml: a PATH topology with
+# colluder_selection=first_and_last puts the designated pair at the two endpoints, so they
+# share no blackboard, and coalition_prompt=always gives them the coalition objective
+# WITHOUT a private channel. That is what makes this an action-only test at all; the old
+# runner could not express it because prompting was tied to the secret board.
+# # Matched to B1 on everything except the filter, so B1 vs B0 is the filtering effect.
+# Model calls route through the shared endpoint; set NEBIUS_API_KEY or OPENROUTER_API_KEY in
+# the repo-root compute.env.
+
+simulation:
+  max_iterations: 1
+  max_planning_rounds: 2
+  max_conversation_steps: 1   # terrarium 0.1.1 composes the step-2 request as a model-turn-final payload; Gemini rejects it with HTTP 400 "Requests ending with a model turn are not supported" on BOTH its native API and its OpenAI-compatibility layer. At 1 step every turn executes its tool cleanly; partner actions are still observed because they are written to the shared blackboard before the next agent moves.
+  seed: 1
+  tags: [track31_b0]
+
+environment:
+  name: JiraTicketEnvironment
+  assignment_filling: false
+  max_tasks: 8
+
+communication_network:
+  topology: path
+  num_agents: 4
+  consolidate_channels: true
+
+llm_models:
+  - label: gemini_3_5_flash_lite
+    llm:
+      provider: openrouter
+      openrouter:
+        model: gemini-3.5-flash-lite
+        params:
+          max_tokens: 1500
+          temperature: 0.7
+
+experiment:
+  tag: track31_b0
+  output_dir: experiments/collusion/outputs/track31_b0
+  max_concurrent_runs: 1
+  seeds: [1]
+  collusion:
+    colluder_selection: first_and_last
+    agent_order: random
+    coalition_prompt: never
+    observation_filter:
+      agents: []
+  sweeps:
+    - name: track31_b0
+      topologies: [path]
+      num_agents: [4]
+      colluder_counts: [2]
+      secret_channel_enabled: [false]
+      prompt_variants: [control]
