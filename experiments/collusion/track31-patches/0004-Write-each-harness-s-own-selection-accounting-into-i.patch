@@ -1,0 +1,81 @@
+From 04c4dce768877ca6389797043ebd681968c43510 Mon Sep 17 00:00:00 2001
+From: Muhammad Hassaan Shaukat <mr.hassaan50@gmail.com>
+Date: Sun, 25 Oct 2026 18:14:39 +0500
+Subject: [PATCH 04/10] Write each harness's own selection accounting into its
+ JSON artifact
+
+The report has to state how many directories were scanned and how many were dropped, and
+that number cannot be re-derived from the surviving rows alone: once the newest artifact
+per arm is kept, the superseded reruns are gone. Both harnesses now carry their own
+counts, plus the feature means and the exact null denominator, so nothing downstream has
+to assert the selection rule it cannot see.
+
+counterfactual_replay.py adds tolerance, scanned, replayable, kept_arms and
+superseded_reruns; decode_actions.py adds scanned, decoded_rows, superseded_reruns, the
+sorted error-marker rejections and the means each rank component is built from. The
+warning printed for the messaging-shut arms also stops claiming a single arm: the block
+makes those primed counts 0/N by construction, which is not a null result.
+---
+ .../experiments/collusion/counterfactual_replay.py  | 13 +++++++++++--
+ colosseum/experiments/collusion/decode_actions.py   | 10 +++++++++-
+ 2 files changed, 20 insertions(+), 3 deletions(-)
+
+diff --git a/colosseum/experiments/collusion/counterfactual_replay.py b/colosseum/experiments/collusion/counterfactual_replay.py
+index 19ac9f2..0cdb9a1 100644
+--- a/colosseum/experiments/collusion/counterfactual_replay.py
++++ b/colosseum/experiments/collusion/counterfactual_replay.py
+@@ -248,9 +248,18 @@ def main() -> int:
+         for tag, why in sorted(set(rejected)):
+             print("  %s: %s" % (tag, why))
+ 
++    # Kept in the artifact as well as printed, so anything reading the JSON can state how many
++    # directories were looked at and how many were dropped, without re-deriving it.
+     dest = HERE / "outputs" / "counterfactual_h2.json"
+-    dest.write_text(json.dumps({"runs": rows, "rejected": sorted(set(rejected))}, indent=2),
+-                    encoding="utf-8")
++    dest.write_text(json.dumps({
++        "tolerance": TOLERANCE,
++        "scanned": len(dirs),
++        "replayable": replayable,
++        "kept_arms": len(rows),
++        "superseded_reruns": superseded,
++        "runs": rows,
++        "rejected": sorted(set(rejected)),
++    }, indent=2), encoding="utf-8")
+     print("wrote", dest)
+     return 0
+ 
+diff --git a/colosseum/experiments/collusion/decode_actions.py b/colosseum/experiments/collusion/decode_actions.py
+index 41401e4..3039976 100644
+--- a/colosseum/experiments/collusion/decode_actions.py
++++ b/colosseum/experiments/collusion/decode_actions.py
+@@ -273,6 +273,7 @@ def main() -> int:
+         return 1
+ 
+     # Re-running an arm is not an independent sample; keep the newest artifact per arm.
++    n_rows_seen = len(rows)
+     newest: Dict[str, dict] = {}
+     for r in rows:
+         if r["arm"] not in newest or r["timestamp"] > newest[r["arm"]]["timestamp"]:
+@@ -353,10 +354,17 @@ def main() -> int:
+         print("text decoder (%s): %d messages posted; coalition claims named by partner beforehand %d/%d, outgroup %d/%d"
+               % (label, ms, bp, bt, op, ot))
+     if shut_arms and sum(r["messages"] for r in shut_arms) == 0:
+-        print("  (the removed arm has zero messages, so its 0/0 is the block working, not a null result)")
++        print("  (every messaging-removed arm has zero messages, so its primed counts are 0/N by"
++              " construction: the block worked, and there is no text to decode)")
+     out = {"runs": rows, "null_rank_1_probability": round(1.0 / n_pairs, 4),
++           "n_pairs": n_pairs,
++           "scanned": len(runs), "decoded_rows": n_rows_seen,
++           "superseded_reruns": n_rows_seen - n,
++           "skipped_error_turns": sorted(set(skipped)),
+            "rank_summary": rank_summary,
+            "true_value_share_mean": round(tv, 4), "rival_value_share_mean": round(rv, 4),
++           "all_pairs_value_share_mean": round(ref, 4),
++           "true_tag_overlap_mean": round(to, 4), "rival_tag_overlap_mean": round(ro, 4),
+            "pair_features": detail}
+     dest = HERE / "outputs" / "decode_h1.json"
+     dest.write_text(json.dumps(out, indent=2), encoding="utf-8")
+-- 
+2.48.1.windows.1
+
