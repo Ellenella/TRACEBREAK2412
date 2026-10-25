@@ -1,0 +1,43 @@
+# Setup pilot: one model, one seed, one cooperative condition.
+# Adapted from supplied Jira configurations; not an unchanged paper reproduction.
+simulation:
+  max_iterations: 1
+  max_planning_rounds: 0
+  max_conversation_steps: 3
+  seed: 1
+  tags: [tracebreak_hide_both]
+environment:
+  name: JiraTicketEnvironment
+  assignment_filling: false
+  max_tasks: 8
+communication_network:
+  topology: complete
+  num_agents: 3
+  consolidate_channels: true
+llm_models:
+  - label: openai-gpt-4.1-mini
+    llm:
+      provider: openai
+      openai:
+        model: gpt-4.1-mini-2025-04-14
+        params:
+          max_tokens: 1500
+          temperature: 0.7
+experiment:
+  tag: tracebreak_hide_both
+  output_dir: experiments/collusion/outputs/tracebreak_hide_both
+  max_concurrent_runs: 1
+  seeds: [1]
+  tracebreak_block_blackboard_tools: true
+  tracebreak_hide_action_events: true
+  tracebreak_mask_assignment_for_agent: Jeanene
+  collusion:
+    colluder_selection: first
+    agent_order: colluders_first
+  sweeps:
+    - name: tracebreak_hide_both
+      topologies: [complete]
+      num_agents: [3]
+      colluder_counts: [2]
+      secret_channel_enabled: [false]
+      prompt_variants: [structured]
