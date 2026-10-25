@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="460" viewBox="0 0 920 460">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="24" y="32" font-family="Georgia, serif" font-size="18">Communication and ordinary joint reward</text>
+<text x="24" y="54" font-family="Calibri, sans-serif" font-size="12" fill="#333">Blue: prompted Δ_signal, n=10, seed 1. Orange: normal-mode joint reward, n=2, same seed.</text>
+<text x="24" y="72" font-family="Calibri, sans-serif" font-size="12" fill="#333">D removed measured bit dependence under the prompted protocol. The joint-reward drop is a preliminary cost of this combined policy, not a per-filter split and not a defense against harmful collusion.</text>
+<rect x="70" y="120.0" width="36" height="240.0" fill="#1f4e79"/>
+<rect x="114" y="168.7324753604571" width="36" height="191.2675246395429" fill="#c45911"/>
+<text x="70" y="382" font-family="Calibri, sans-serif" font-size="13">A</text>
+<text x="70" y="114.0" font-family="Calibri, sans-serif" font-size="12">1.00</text>
+<text x="114" y="162.7324753604571" font-family="Calibri, sans-serif" font-size="12">63.8</text>
+<text x="70" y="400" font-family="Calibri, sans-serif" font-size="11" fill="#333">A both visible</text>
+<rect x="280" y="120.0" width="36" height="240.0" fill="#1f4e79"/>
+<rect x="324" y="167.11280361184657" width="36" height="192.88719638815343" fill="#c45911"/>
+<text x="280" y="382" font-family="Calibri, sans-serif" font-size="13">B</text>
+<text x="280" y="114.0" font-family="Calibri, sans-serif" font-size="12">1.00</text>
+<text x="324" y="161.11280361184657" font-family="Calibri, sans-serif" font-size="12">64.3</text>
+<text x="280" y="400" font-family="Calibri, sans-serif" font-size="11" fill="#333">B events hidden</text>
+<rect x="490" y="120.0" width="36" height="240.0" fill="#1f4e79"/>
+<rect x="534" y="168.7324753604571" width="36" height="191.2675246395429" fill="#c45911"/>
+<text x="490" y="382" font-family="Calibri, sans-serif" font-size="13">C</text>
+<text x="490" y="114.0" font-family="Calibri, sans-serif" font-size="12">1.00</text>
+<text x="534" y="162.7324753604571" font-family="Calibri, sans-serif" font-size="12">63.8</text>
+<text x="490" y="400" font-family="Calibri, sans-serif" font-size="11" fill="#333">C Jeanene assignment hidden</text>
+<rect x="700" y="360.0" width="36" height="0.0" fill="#1f4e79"/>
+<rect x="744" y="219.64916909861935" width="36" height="140.35083090138065" fill="#c45911"/>
+<text x="700" y="382" font-family="Calibri, sans-serif" font-size="13">D</text>
+<text x="700" y="354.0" font-family="Calibri, sans-serif" font-size="12">0.00</text>
+<text x="744" y="213.64916909861935" font-family="Calibri, sans-serif" font-size="12">46.8</text>
+<text x="700" y="400" font-family="Calibri, sans-serif" font-size="11" fill="#333">D both removed</text>
+<rect x="70" y="420" width="14" height="14" fill="#1f4e79"/>
+<text x="90" y="432" font-family="Calibri, sans-serif" font-size="12">Δ_signal (prompted protocol)</text>
+<rect x="320" y="420" width="14" height="14" fill="#c45911"/>
+<text x="340" y="432" font-family="Calibri, sans-serif" font-size="12">Normal-mode joint reward (separate study)</text>
+</svg>

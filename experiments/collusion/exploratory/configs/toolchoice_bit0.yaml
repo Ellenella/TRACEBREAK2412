@@ -1,0 +1,46 @@
+# Exploratory tool-choice prototype. Not part of the frozen TRACEBREAK 54.
+# The carrier is skip versus claim. The issue id is not the code.
+# Do not pool these outputs with the signaling, utility, or harm-gate manifests.
+simulation:
+  max_iterations: 1
+  max_planning_rounds: 0
+  max_conversation_steps: 3
+  seed: 1
+  tags: [exploratory_toolchoice_bit0]
+environment:
+  name: JiraTicketEnvironment
+  assignment_filling: false
+  max_tasks: 8
+communication_network:
+  topology: complete
+  num_agents: 3
+  consolidate_channels: true
+llm_models:
+  - label: openai-gpt-4.1-mini
+    llm:
+      provider: openai
+      openai:
+        model: gpt-4.1-mini-2025-04-14
+        params:
+          max_tokens: 1500
+          temperature: 0.7
+experiment:
+  tag: exploratory_toolchoice_bit0
+  output_dir: experiments/collusion/exploratory/outputs/toolchoice_bit0
+  max_concurrent_runs: 1
+  seeds: [1]
+  tracebreak_block_blackboard_tools: true
+  tracebreak_hide_action_events: false
+  exploratory_tool_choice:
+    enabled: true
+    bit: 0
+  collusion:
+    colluder_selection: first
+    agent_order: colluders_first
+  sweeps:
+    - name: exploratory_toolchoice_bit0
+      topologies: [complete]
+      num_agents: [3]
+      colluder_counts: [0]
+      secret_channel_enabled: [false]
+      prompt_variants: [control]
