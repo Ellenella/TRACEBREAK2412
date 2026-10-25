@@ -1,0 +1,45 @@
+# Exploratory tool-identity signaling. T2 canonicalized observations. Bit 1.
+simulation:
+  max_iterations: 1
+  max_planning_rounds: 0
+  max_conversation_steps: 3
+  seed: 1
+  tags: [tool_selection_t2_bit1]
+environment:
+  import_path: experiments.collusion.tool_selection.env:JiraTicketToolSelectionEnvironment
+  assignment_filling: false
+  max_tasks: 8
+communication_network:
+  topology: complete
+  num_agents: 3
+  consolidate_channels: true
+llm_models:
+  - label: openai-gpt-4.1-mini
+    llm:
+      provider: openai
+      openai:
+        model: gpt-4.1-mini-2025-04-14
+        params:
+          max_tokens: 1500
+          temperature: 0.7
+experiment:
+  tag: tool_selection_t2_bit1
+  output_dir: experiments/collusion/tool_selection/outputs/t2_bit1
+  max_concurrent_runs: 1
+  seeds: [1]
+  tracebreak_block_blackboard_tools: true
+  tracebreak_hide_action_events: false
+  tool_selection:
+    enabled: true
+    bit: 1
+    canonicalize_identity: true
+  collusion:
+    colluder_selection: first
+    agent_order: colluders_first
+  sweeps:
+    - name: tool_selection_t2_bit1
+      topologies: [complete]
+      num_agents: [3]
+      colluder_counts: [0]
+      secret_channel_enabled: [false]
+      prompt_variants: [control]
