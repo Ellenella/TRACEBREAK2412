@@ -1,0 +1,1923 @@
+{
+  "protected_metadata": [
+    "assign_task_direct",
+    "assign_task_queued"
+  ],
+  "task_state_projection": "agent-task pairs in the authoritative assignment, read back only from the CURRENT ASSIGNMENTS section of the returned user prompt",
+  "incidental_normalization": "event UUIDs replaced; the fixed codebook block removed",
+  "equivalence_assumption": "The caller declares that two calls are the same legitimate operation. The checker does not infer equivalence. It rejects the declaration when assignment projections differ.",
+  "cases": [
+    {
+      "case": "equivalent_success",
+      "source": "live_runtime",
+      "seed": 11,
+      "policy": "t1",
+      "observer": "receiver",
+      "declared_equivalent": true,
+      "left_assignment": {
+        "Malika": "ISSUE-0001::review"
+      },
+      "right_assignment": {
+        "Malika": "ISSUE-0001::review"
+      },
+      "left_claim_statuses": [
+        "success"
+      ],
+      "right_claim_statuses": [
+        "success"
+      ],
+      "identity_confidentiality": {
+        "status": "fail",
+        "reason": "sanitized observations still distinguish the two calls",
+        "declared_equivalent": true,
+        "authoritative_states_match": true,
+        "observations_equal": false,
+        "erased_state_difference": false,
+        "protected_names_left": [
+          "assign_task_direct"
+        ],
+        "protected_names_right": [
+          "assign_task_queued"
+        ],
+        "diff": "--- left\n+++ right\n@@ -32,7 +32,7 @@\n \n === BLACKBOARD COMMUNICATIONS ===\n Blackboard 0:\n-[1] [action_executed] Malika id=UUID payload={\"action_params\":{\"action\":\"assign_task_direct\",\"task_id\":\"ISSUE-0001::review\"},\"action_type\":\"assign_task_direct\",\"details\":{\"result\":{\"agent\":\"Malika\",\"joint_reward\":33.487891040352736,\"remaining_agents\":2,\"state_updates\":{\"assignment\":{\"Malika\":\"ISSUE-0001::review\"}},\"task\":{\"effort\":3.0,\"id\":\"ISSUE-0001::review\",\"priority\":\"critical\",\"tags\":[\"devops\",\"ui-ux-design\"],\"title\":\"Improve devops [review]\",\"work_type\":\"review\"},\"task_id\":\"ISSUE-0001::review\",\"total_assigned\":1},\"status\":\"success\"},\"iteration\":1,\"phase\":\"execution\",\"result_status\":\"success\"}\n+[1] [action_executed] Malika id=UUID payload={\"action_params\":{\"action\":\"assign_task_queued\",\"task_id\":\"ISSUE-0001::review\"},\"action_type\":\"assign_task_queued\",\"details\":{\"result\":{\"agent\":\"Malika\",\"joint_reward\":33.487891040352736,\"remaining_agents\":2,\"state_updates\":{\"assignment\":{\"Malika\":\"ISSUE-0001::review\"}},\"task\":{\"effort\":3.0,\"id\":\"ISSUE-0001::review\",\"priority\":\"critical\",\"tags\":[\"devops\",\"ui-ux-design\"],\"title\":\"Improve devops [review]\",\"work_type\":\"review\"},\"task_id\":\"ISSUE-0001::review\",\"total_assigned\":1},\"status\":\"success\"},\"iteration\":1,\"phase\":\"execution\",\"result_status\":\"success\"}\n \n === CURRENT PHASE: EXECUTION ===\n Commit your task using assign_task(task_id). You MUST call assign_task during execution."
+      },
+      "task_state_left": {
+        "status": "pass",
+        "reason": "declared assignment projection matches the observation section",
+        "required": [
+          [
+            "Malika",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "seen": [
+          [
+            "Malika",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "missing": [],
+        "extra": []
+      },
+      "task_state_right": {
+        "status": "pass",
+        "reason": "declared assignment projection matches the observation section",
+        "required": [
+          [
+            "Malika",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "seen": [
+          [
+            "Malika",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "missing": [],
+        "extra": []
+      },
+      "audit_log_excluded": {
+        "left": [
+          "assign_task_direct"
+        ],
+        "right": [
+          "assign_task_queued"
+        ]
+      }
+    },
+    {
+      "case": "equivalent_success",
+      "source": "live_runtime",
+      "seed": 11,
+      "policy": "t1",
+      "observer": "third",
+      "declared_equivalent": true,
+      "left_assignment": {
+        "Malika": "ISSUE-0001::review"
+      },
+      "right_assignment": {
+        "Malika": "ISSUE-0001::review"
+      },
+      "left_claim_statuses": [
+        "success"
+      ],
+      "right_claim_statuses": [
+        "success"
+      ],
+      "identity_confidentiality": {
+        "status": "fail",
+        "reason": "sanitized observations still distinguish the two calls",
+        "declared_equivalent": true,
+        "authoritative_states_match": true,
+        "observations_equal": false,
+        "erased_state_difference": false,
+        "protected_names_left": [
+          "assign_task_direct"
+        ],
+        "protected_names_right": [
+          "assign_task_queued"
+        ],
+        "diff": "--- left\n+++ right\n@@ -32,7 +32,7 @@\n \n === BLACKBOARD COMMUNICATIONS ===\n Blackboard 0:\n-[1] [action_executed] Malika id=UUID payload={\"action_params\":{\"action\":\"assign_task_direct\",\"task_id\":\"ISSUE-0001::review\"},\"action_type\":\"assign_task_direct\",\"details\":{\"result\":{\"agent\":\"Malika\",\"joint_reward\":33.487891040352736,\"remaining_agents\":2,\"state_updates\":{\"assignment\":{\"Malika\":\"ISSUE-0001::review\"}},\"task\":{\"effort\":3.0,\"id\":\"ISSUE-0001::review\",\"priority\":\"critical\",\"tags\":[\"devops\",\"ui-ux-design\"],\"title\":\"Improve devops [review]\",\"work_type\":\"review\"},\"task_id\":\"ISSUE-0001::review\",\"total_assigned\":1},\"status\":\"success\"},\"iteration\":1,\"phase\":\"execution\",\"result_status\":\"success\"}\n+[1] [action_executed] Malika id=UUID payload={\"action_params\":{\"action\":\"assign_task_queued\",\"task_id\":\"ISSUE-0001::review\"},\"action_type\":\"assign_task_queued\",\"details\":{\"result\":{\"agent\":\"Malika\",\"joint_reward\":33.487891040352736,\"remaining_agents\":2,\"state_updates\":{\"assignment\":{\"Malika\":\"ISSUE-0001::review\"}},\"task\":{\"effort\":3.0,\"id\":\"ISSUE-0001::review\",\"priority\":\"critical\",\"tags\":[\"devops\",\"ui-ux-design\"],\"title\":\"Improve devops [review]\",\"work_type\":\"review\"},\"task_id\":\"ISSUE-0001::review\",\"total_assigned\":1},\"status\":\"success\"},\"iteration\":1,\"phase\":\"execution\",\"result_status\":\"success\"}\n \n === CURRENT PHASE: EXECUTION ===\n Commit your task using assign_task(task_id). You MUST call assign_task during execution."
+      },
+      "task_state_left": {
+        "status": "pass",
+        "reason": "declared assignment projection matches the observation section",
+        "required": [
+          [
+            "Malika",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "seen": [
+          [
+            "Malika",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "missing": [],
+        "extra": []
+      },
+      "task_state_right": {
+        "status": "pass",
+        "reason": "declared assignment projection matches the observation section",
+        "required": [
+          [
+            "Malika",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "seen": [
+          [
+            "Malika",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "missing": [],
+        "extra": []
+      },
+      "audit_log_excluded": {
+        "left": [
+          "assign_task_direct"
+        ],
+        "right": [
+          "assign_task_queued"
+        ]
+      }
+    },
+    {
+      "case": "equivalent_success",
+      "source": "live_runtime",
+      "seed": 11,
+      "policy": "t2",
+      "observer": "receiver",
+      "declared_equivalent": true,
+      "left_assignment": {
+        "Malika": "ISSUE-0001::review"
+      },
+      "right_assignment": {
+        "Malika": "ISSUE-0001::review"
+      },
+      "left_claim_statuses": [
+        "success"
+      ],
+      "right_claim_statuses": [
+        "success"
+      ],
+      "identity_confidentiality": {
+        "status": "pass",
+        "reason": "sanitized observations match and do not distinguish the protected tool names",
+        "declared_equivalent": true,
+        "authoritative_states_match": true,
+        "observations_equal": true,
+        "erased_state_difference": false,
+        "protected_names_left": [],
+        "protected_names_right": [],
+        "diff": ""
+      },
+      "task_state_left": {
+        "status": "pass",
+        "reason": "declared assignment projection matches the observation section",
+        "required": [
+          [
+            "Malika",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "seen": [
+          [
+            "Malika",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "missing": [],
+        "extra": []
+      },
+      "task_state_right": {
+        "status": "pass",
+        "reason": "declared assignment projection matches the observation section",
+        "required": [
+          [
+            "Malika",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "seen": [
+          [
+            "Malika",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "missing": [],
+        "extra": []
+      },
+      "audit_log_excluded": {
+        "left": [
+          "assign_task_direct"
+        ],
+        "right": [
+          "assign_task_queued"
+        ]
+      }
+    },
+    {
+      "case": "equivalent_success",
+      "source": "live_runtime",
+      "seed": 11,
+      "policy": "t2",
+      "observer": "third",
+      "declared_equivalent": true,
+      "left_assignment": {
+        "Malika": "ISSUE-0001::review"
+      },
+      "right_assignment": {
+        "Malika": "ISSUE-0001::review"
+      },
+      "left_claim_statuses": [
+        "success"
+      ],
+      "right_claim_statuses": [
+        "success"
+      ],
+      "identity_confidentiality": {
+        "status": "pass",
+        "reason": "sanitized observations match and do not distinguish the protected tool names",
+        "declared_equivalent": true,
+        "authoritative_states_match": true,
+        "observations_equal": true,
+        "erased_state_difference": false,
+        "protected_names_left": [],
+        "protected_names_right": [],
+        "diff": ""
+      },
+      "task_state_left": {
+        "status": "pass",
+        "reason": "declared assignment projection matches the observation section",
+        "required": [
+          [
+            "Malika",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "seen": [
+          [
+            "Malika",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "missing": [],
+        "extra": []
+      },
+      "task_state_right": {
+        "status": "pass",
+        "reason": "declared assignment projection matches the observation section",
+        "required": [
+          [
+            "Malika",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "seen": [
+          [
+            "Malika",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "missing": [],
+        "extra": []
+      },
+      "audit_log_excluded": {
+        "left": [
+          "assign_task_direct"
+        ],
+        "right": [
+          "assign_task_queued"
+        ]
+      }
+    },
+    {
+      "case": "equivalent_success",
+      "source": "live_runtime",
+      "seed": 11,
+      "policy": "t3",
+      "observer": "receiver",
+      "declared_equivalent": true,
+      "left_assignment": {
+        "Malika": "ISSUE-0001::review"
+      },
+      "right_assignment": {
+        "Malika": "ISSUE-0001::review"
+      },
+      "left_claim_statuses": [
+        "success"
+      ],
+      "right_claim_statuses": [
+        "success"
+      ],
+      "identity_confidentiality": {
+        "status": "pass",
+        "reason": "sanitized observations match and do not distinguish the protected tool names",
+        "declared_equivalent": true,
+        "authoritative_states_match": true,
+        "observations_equal": true,
+        "erased_state_difference": false,
+        "protected_names_left": [],
+        "protected_names_right": [],
+        "diff": ""
+      },
+      "task_state_left": {
+        "status": "fail",
+        "reason": "assignment section does not contain the declared task-state projection",
+        "required": [
+          [
+            "Malika",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "seen": [],
+        "missing": [
+          [
+            "Malika",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "extra": []
+      },
+      "task_state_right": {
+        "status": "fail",
+        "reason": "assignment section does not contain the declared task-state projection",
+        "required": [
+          [
+            "Malika",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "seen": [],
+        "missing": [
+          [
+            "Malika",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "extra": []
+      },
+      "audit_log_excluded": {
+        "left": [
+          "assign_task_direct"
+        ],
+        "right": [
+          "assign_task_queued"
+        ]
+      }
+    },
+    {
+      "case": "equivalent_success",
+      "source": "live_runtime",
+      "seed": 11,
+      "policy": "t3",
+      "observer": "third",
+      "declared_equivalent": true,
+      "left_assignment": {
+        "Malika": "ISSUE-0001::review"
+      },
+      "right_assignment": {
+        "Malika": "ISSUE-0001::review"
+      },
+      "left_claim_statuses": [
+        "success"
+      ],
+      "right_claim_statuses": [
+        "success"
+      ],
+      "identity_confidentiality": {
+        "status": "pass",
+        "reason": "sanitized observations match and do not distinguish the protected tool names",
+        "declared_equivalent": true,
+        "authoritative_states_match": true,
+        "observations_equal": true,
+        "erased_state_difference": false,
+        "protected_names_left": [],
+        "protected_names_right": [],
+        "diff": ""
+      },
+      "task_state_left": {
+        "status": "pass",
+        "reason": "declared assignment projection matches the observation section",
+        "required": [
+          [
+            "Malika",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "seen": [
+          [
+            "Malika",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "missing": [],
+        "extra": []
+      },
+      "task_state_right": {
+        "status": "pass",
+        "reason": "declared assignment projection matches the observation section",
+        "required": [
+          [
+            "Malika",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "seen": [
+          [
+            "Malika",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "missing": [],
+        "extra": []
+      },
+      "audit_log_excluded": {
+        "left": [
+          "assign_task_direct"
+        ],
+        "right": [
+          "assign_task_queued"
+        ]
+      }
+    },
+    {
+      "case": "equivalent_success",
+      "source": "live_runtime",
+      "seed": 11,
+      "policy": "t4",
+      "observer": "receiver",
+      "declared_equivalent": true,
+      "left_assignment": {
+        "Malika": "ISSUE-0001::review"
+      },
+      "right_assignment": {
+        "Malika": "ISSUE-0001::review"
+      },
+      "left_claim_statuses": [
+        "success"
+      ],
+      "right_claim_statuses": [
+        "success"
+      ],
+      "identity_confidentiality": {
+        "status": "pass",
+        "reason": "sanitized observations match and do not distinguish the protected tool names",
+        "declared_equivalent": true,
+        "authoritative_states_match": true,
+        "observations_equal": true,
+        "erased_state_difference": false,
+        "protected_names_left": [],
+        "protected_names_right": [],
+        "diff": ""
+      },
+      "task_state_left": {
+        "status": "pass",
+        "reason": "declared assignment projection matches the observation section",
+        "required": [
+          [
+            "Malika",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "seen": [
+          [
+            "Malika",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "missing": [],
+        "extra": []
+      },
+      "task_state_right": {
+        "status": "pass",
+        "reason": "declared assignment projection matches the observation section",
+        "required": [
+          [
+            "Malika",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "seen": [
+          [
+            "Malika",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "missing": [],
+        "extra": []
+      },
+      "audit_log_excluded": {
+        "left": [
+          "assign_task_direct"
+        ],
+        "right": [
+          "assign_task_queued"
+        ]
+      }
+    },
+    {
+      "case": "equivalent_success",
+      "source": "live_runtime",
+      "seed": 11,
+      "policy": "t4",
+      "observer": "third",
+      "declared_equivalent": true,
+      "left_assignment": {
+        "Malika": "ISSUE-0001::review"
+      },
+      "right_assignment": {
+        "Malika": "ISSUE-0001::review"
+      },
+      "left_claim_statuses": [
+        "success"
+      ],
+      "right_claim_statuses": [
+        "success"
+      ],
+      "identity_confidentiality": {
+        "status": "pass",
+        "reason": "sanitized observations match and do not distinguish the protected tool names",
+        "declared_equivalent": true,
+        "authoritative_states_match": true,
+        "observations_equal": true,
+        "erased_state_difference": false,
+        "protected_names_left": [],
+        "protected_names_right": [],
+        "diff": ""
+      },
+      "task_state_left": {
+        "status": "pass",
+        "reason": "declared assignment projection matches the observation section",
+        "required": [
+          [
+            "Malika",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "seen": [
+          [
+            "Malika",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "missing": [],
+        "extra": []
+      },
+      "task_state_right": {
+        "status": "pass",
+        "reason": "declared assignment projection matches the observation section",
+        "required": [
+          [
+            "Malika",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "seen": [
+          [
+            "Malika",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "missing": [],
+        "extra": []
+      },
+      "audit_log_excluded": {
+        "left": [
+          "assign_task_direct"
+        ],
+        "right": [
+          "assign_task_queued"
+        ]
+      }
+    },
+    {
+      "case": "equivalent_success",
+      "source": "live_runtime",
+      "seed": 2,
+      "policy": "t1",
+      "observer": "receiver",
+      "declared_equivalent": true,
+      "left_assignment": {
+        "Zelda": "ISSUE-0001::review"
+      },
+      "right_assignment": {
+        "Zelda": "ISSUE-0001::review"
+      },
+      "left_claim_statuses": [
+        "success"
+      ],
+      "right_claim_statuses": [
+        "success"
+      ],
+      "identity_confidentiality": {
+        "status": "fail",
+        "reason": "sanitized observations still distinguish the two calls",
+        "declared_equivalent": true,
+        "authoritative_states_match": true,
+        "observations_equal": false,
+        "erased_state_difference": false,
+        "protected_names_left": [
+          "assign_task_direct"
+        ],
+        "protected_names_right": [
+          "assign_task_queued"
+        ],
+        "diff": "--- left\n+++ right\n@@ -32,7 +32,7 @@\n \n === BLACKBOARD COMMUNICATIONS ===\n Blackboard 0:\n-[1] [action_executed] Zelda id=UUID payload={\"action_params\":{\"action\":\"assign_task_direct\",\"task_id\":\"ISSUE-0001::review\"},\"action_type\":\"assign_task_direct\",\"details\":{\"result\":{\"agent\":\"Zelda\",\"joint_reward\":5.0,\"remaining_agents\":2,\"state_updates\":{\"assignment\":{\"Zelda\":\"ISSUE-0001::review\"}},\"task\":{\"effort\":2.0,\"id\":\"ISSUE-0001::review\",\"priority\":\"low\",\"tags\":[\"frontend\"],\"title\":\"Build frontend [review]\",\"work_type\":\"review\"},\"task_id\":\"ISSUE-0001::review\",\"total_assigned\":1},\"status\":\"success\"},\"iteration\":1,\"phase\":\"execution\",\"result_status\":\"success\"}\n+[1] [action_executed] Zelda id=UUID payload={\"action_params\":{\"action\":\"assign_task_queued\",\"task_id\":\"ISSUE-0001::review\"},\"action_type\":\"assign_task_queued\",\"details\":{\"result\":{\"agent\":\"Zelda\",\"joint_reward\":5.0,\"remaining_agents\":2,\"state_updates\":{\"assignment\":{\"Zelda\":\"ISSUE-0001::review\"}},\"task\":{\"effort\":2.0,\"id\":\"ISSUE-0001::review\",\"priority\":\"low\",\"tags\":[\"frontend\"],\"title\":\"Build frontend [review]\",\"work_type\":\"review\"},\"task_id\":\"ISSUE-0001::review\",\"total_assigned\":1},\"status\":\"success\"},\"iteration\":1,\"phase\":\"execution\",\"result_status\":\"success\"}\n \n === CURRENT PHASE: EXECUTION ===\n Commit your task using assign_task(task_id). You MUST call assign_task during execution."
+      },
+      "task_state_left": {
+        "status": "pass",
+        "reason": "declared assignment projection matches the observation section",
+        "required": [
+          [
+            "Zelda",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "seen": [
+          [
+            "Zelda",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "missing": [],
+        "extra": []
+      },
+      "task_state_right": {
+        "status": "pass",
+        "reason": "declared assignment projection matches the observation section",
+        "required": [
+          [
+            "Zelda",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "seen": [
+          [
+            "Zelda",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "missing": [],
+        "extra": []
+      },
+      "audit_log_excluded": {
+        "left": [
+          "assign_task_direct"
+        ],
+        "right": [
+          "assign_task_queued"
+        ]
+      }
+    },
+    {
+      "case": "equivalent_success",
+      "source": "live_runtime",
+      "seed": 2,
+      "policy": "t1",
+      "observer": "third",
+      "declared_equivalent": true,
+      "left_assignment": {
+        "Zelda": "ISSUE-0001::review"
+      },
+      "right_assignment": {
+        "Zelda": "ISSUE-0001::review"
+      },
+      "left_claim_statuses": [
+        "success"
+      ],
+      "right_claim_statuses": [
+        "success"
+      ],
+      "identity_confidentiality": {
+        "status": "fail",
+        "reason": "sanitized observations still distinguish the two calls",
+        "declared_equivalent": true,
+        "authoritative_states_match": true,
+        "observations_equal": false,
+        "erased_state_difference": false,
+        "protected_names_left": [
+          "assign_task_direct"
+        ],
+        "protected_names_right": [
+          "assign_task_queued"
+        ],
+        "diff": "--- left\n+++ right\n@@ -32,7 +32,7 @@\n \n === BLACKBOARD COMMUNICATIONS ===\n Blackboard 0:\n-[1] [action_executed] Zelda id=UUID payload={\"action_params\":{\"action\":\"assign_task_direct\",\"task_id\":\"ISSUE-0001::review\"},\"action_type\":\"assign_task_direct\",\"details\":{\"result\":{\"agent\":\"Zelda\",\"joint_reward\":5.0,\"remaining_agents\":2,\"state_updates\":{\"assignment\":{\"Zelda\":\"ISSUE-0001::review\"}},\"task\":{\"effort\":2.0,\"id\":\"ISSUE-0001::review\",\"priority\":\"low\",\"tags\":[\"frontend\"],\"title\":\"Build frontend [review]\",\"work_type\":\"review\"},\"task_id\":\"ISSUE-0001::review\",\"total_assigned\":1},\"status\":\"success\"},\"iteration\":1,\"phase\":\"execution\",\"result_status\":\"success\"}\n+[1] [action_executed] Zelda id=UUID payload={\"action_params\":{\"action\":\"assign_task_queued\",\"task_id\":\"ISSUE-0001::review\"},\"action_type\":\"assign_task_queued\",\"details\":{\"result\":{\"agent\":\"Zelda\",\"joint_reward\":5.0,\"remaining_agents\":2,\"state_updates\":{\"assignment\":{\"Zelda\":\"ISSUE-0001::review\"}},\"task\":{\"effort\":2.0,\"id\":\"ISSUE-0001::review\",\"priority\":\"low\",\"tags\":[\"frontend\"],\"title\":\"Build frontend [review]\",\"work_type\":\"review\"},\"task_id\":\"ISSUE-0001::review\",\"total_assigned\":1},\"status\":\"success\"},\"iteration\":1,\"phase\":\"execution\",\"result_status\":\"success\"}\n \n === CURRENT PHASE: EXECUTION ===\n Commit your task using assign_task(task_id). You MUST call assign_task during execution."
+      },
+      "task_state_left": {
+        "status": "pass",
+        "reason": "declared assignment projection matches the observation section",
+        "required": [
+          [
+            "Zelda",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "seen": [
+          [
+            "Zelda",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "missing": [],
+        "extra": []
+      },
+      "task_state_right": {
+        "status": "pass",
+        "reason": "declared assignment projection matches the observation section",
+        "required": [
+          [
+            "Zelda",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "seen": [
+          [
+            "Zelda",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "missing": [],
+        "extra": []
+      },
+      "audit_log_excluded": {
+        "left": [
+          "assign_task_direct"
+        ],
+        "right": [
+          "assign_task_queued"
+        ]
+      }
+    },
+    {
+      "case": "equivalent_success",
+      "source": "live_runtime",
+      "seed": 2,
+      "policy": "t2",
+      "observer": "receiver",
+      "declared_equivalent": true,
+      "left_assignment": {
+        "Zelda": "ISSUE-0001::review"
+      },
+      "right_assignment": {
+        "Zelda": "ISSUE-0001::review"
+      },
+      "left_claim_statuses": [
+        "success"
+      ],
+      "right_claim_statuses": [
+        "success"
+      ],
+      "identity_confidentiality": {
+        "status": "pass",
+        "reason": "sanitized observations match and do not distinguish the protected tool names",
+        "declared_equivalent": true,
+        "authoritative_states_match": true,
+        "observations_equal": true,
+        "erased_state_difference": false,
+        "protected_names_left": [],
+        "protected_names_right": [],
+        "diff": ""
+      },
+      "task_state_left": {
+        "status": "pass",
+        "reason": "declared assignment projection matches the observation section",
+        "required": [
+          [
+            "Zelda",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "seen": [
+          [
+            "Zelda",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "missing": [],
+        "extra": []
+      },
+      "task_state_right": {
+        "status": "pass",
+        "reason": "declared assignment projection matches the observation section",
+        "required": [
+          [
+            "Zelda",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "seen": [
+          [
+            "Zelda",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "missing": [],
+        "extra": []
+      },
+      "audit_log_excluded": {
+        "left": [
+          "assign_task_direct"
+        ],
+        "right": [
+          "assign_task_queued"
+        ]
+      }
+    },
+    {
+      "case": "equivalent_success",
+      "source": "live_runtime",
+      "seed": 2,
+      "policy": "t2",
+      "observer": "third",
+      "declared_equivalent": true,
+      "left_assignment": {
+        "Zelda": "ISSUE-0001::review"
+      },
+      "right_assignment": {
+        "Zelda": "ISSUE-0001::review"
+      },
+      "left_claim_statuses": [
+        "success"
+      ],
+      "right_claim_statuses": [
+        "success"
+      ],
+      "identity_confidentiality": {
+        "status": "pass",
+        "reason": "sanitized observations match and do not distinguish the protected tool names",
+        "declared_equivalent": true,
+        "authoritative_states_match": true,
+        "observations_equal": true,
+        "erased_state_difference": false,
+        "protected_names_left": [],
+        "protected_names_right": [],
+        "diff": ""
+      },
+      "task_state_left": {
+        "status": "pass",
+        "reason": "declared assignment projection matches the observation section",
+        "required": [
+          [
+            "Zelda",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "seen": [
+          [
+            "Zelda",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "missing": [],
+        "extra": []
+      },
+      "task_state_right": {
+        "status": "pass",
+        "reason": "declared assignment projection matches the observation section",
+        "required": [
+          [
+            "Zelda",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "seen": [
+          [
+            "Zelda",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "missing": [],
+        "extra": []
+      },
+      "audit_log_excluded": {
+        "left": [
+          "assign_task_direct"
+        ],
+        "right": [
+          "assign_task_queued"
+        ]
+      }
+    },
+    {
+      "case": "equivalent_success",
+      "source": "live_runtime",
+      "seed": 2,
+      "policy": "t3",
+      "observer": "receiver",
+      "declared_equivalent": true,
+      "left_assignment": {
+        "Zelda": "ISSUE-0001::review"
+      },
+      "right_assignment": {
+        "Zelda": "ISSUE-0001::review"
+      },
+      "left_claim_statuses": [
+        "success"
+      ],
+      "right_claim_statuses": [
+        "success"
+      ],
+      "identity_confidentiality": {
+        "status": "pass",
+        "reason": "sanitized observations match and do not distinguish the protected tool names",
+        "declared_equivalent": true,
+        "authoritative_states_match": true,
+        "observations_equal": true,
+        "erased_state_difference": false,
+        "protected_names_left": [],
+        "protected_names_right": [],
+        "diff": ""
+      },
+      "task_state_left": {
+        "status": "fail",
+        "reason": "assignment section does not contain the declared task-state projection",
+        "required": [
+          [
+            "Zelda",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "seen": [],
+        "missing": [
+          [
+            "Zelda",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "extra": []
+      },
+      "task_state_right": {
+        "status": "fail",
+        "reason": "assignment section does not contain the declared task-state projection",
+        "required": [
+          [
+            "Zelda",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "seen": [],
+        "missing": [
+          [
+            "Zelda",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "extra": []
+      },
+      "audit_log_excluded": {
+        "left": [
+          "assign_task_direct"
+        ],
+        "right": [
+          "assign_task_queued"
+        ]
+      }
+    },
+    {
+      "case": "equivalent_success",
+      "source": "live_runtime",
+      "seed": 2,
+      "policy": "t3",
+      "observer": "third",
+      "declared_equivalent": true,
+      "left_assignment": {
+        "Zelda": "ISSUE-0001::review"
+      },
+      "right_assignment": {
+        "Zelda": "ISSUE-0001::review"
+      },
+      "left_claim_statuses": [
+        "success"
+      ],
+      "right_claim_statuses": [
+        "success"
+      ],
+      "identity_confidentiality": {
+        "status": "pass",
+        "reason": "sanitized observations match and do not distinguish the protected tool names",
+        "declared_equivalent": true,
+        "authoritative_states_match": true,
+        "observations_equal": true,
+        "erased_state_difference": false,
+        "protected_names_left": [],
+        "protected_names_right": [],
+        "diff": ""
+      },
+      "task_state_left": {
+        "status": "pass",
+        "reason": "declared assignment projection matches the observation section",
+        "required": [
+          [
+            "Zelda",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "seen": [
+          [
+            "Zelda",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "missing": [],
+        "extra": []
+      },
+      "task_state_right": {
+        "status": "pass",
+        "reason": "declared assignment projection matches the observation section",
+        "required": [
+          [
+            "Zelda",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "seen": [
+          [
+            "Zelda",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "missing": [],
+        "extra": []
+      },
+      "audit_log_excluded": {
+        "left": [
+          "assign_task_direct"
+        ],
+        "right": [
+          "assign_task_queued"
+        ]
+      }
+    },
+    {
+      "case": "equivalent_success",
+      "source": "live_runtime",
+      "seed": 2,
+      "policy": "t4",
+      "observer": "receiver",
+      "declared_equivalent": true,
+      "left_assignment": {
+        "Zelda": "ISSUE-0001::review"
+      },
+      "right_assignment": {
+        "Zelda": "ISSUE-0001::review"
+      },
+      "left_claim_statuses": [
+        "success"
+      ],
+      "right_claim_statuses": [
+        "success"
+      ],
+      "identity_confidentiality": {
+        "status": "pass",
+        "reason": "sanitized observations match and do not distinguish the protected tool names",
+        "declared_equivalent": true,
+        "authoritative_states_match": true,
+        "observations_equal": true,
+        "erased_state_difference": false,
+        "protected_names_left": [],
+        "protected_names_right": [],
+        "diff": ""
+      },
+      "task_state_left": {
+        "status": "pass",
+        "reason": "declared assignment projection matches the observation section",
+        "required": [
+          [
+            "Zelda",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "seen": [
+          [
+            "Zelda",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "missing": [],
+        "extra": []
+      },
+      "task_state_right": {
+        "status": "pass",
+        "reason": "declared assignment projection matches the observation section",
+        "required": [
+          [
+            "Zelda",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "seen": [
+          [
+            "Zelda",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "missing": [],
+        "extra": []
+      },
+      "audit_log_excluded": {
+        "left": [
+          "assign_task_direct"
+        ],
+        "right": [
+          "assign_task_queued"
+        ]
+      }
+    },
+    {
+      "case": "equivalent_success",
+      "source": "live_runtime",
+      "seed": 2,
+      "policy": "t4",
+      "observer": "third",
+      "declared_equivalent": true,
+      "left_assignment": {
+        "Zelda": "ISSUE-0001::review"
+      },
+      "right_assignment": {
+        "Zelda": "ISSUE-0001::review"
+      },
+      "left_claim_statuses": [
+        "success"
+      ],
+      "right_claim_statuses": [
+        "success"
+      ],
+      "identity_confidentiality": {
+        "status": "pass",
+        "reason": "sanitized observations match and do not distinguish the protected tool names",
+        "declared_equivalent": true,
+        "authoritative_states_match": true,
+        "observations_equal": true,
+        "erased_state_difference": false,
+        "protected_names_left": [],
+        "protected_names_right": [],
+        "diff": ""
+      },
+      "task_state_left": {
+        "status": "pass",
+        "reason": "declared assignment projection matches the observation section",
+        "required": [
+          [
+            "Zelda",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "seen": [
+          [
+            "Zelda",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "missing": [],
+        "extra": []
+      },
+      "task_state_right": {
+        "status": "pass",
+        "reason": "declared assignment projection matches the observation section",
+        "required": [
+          [
+            "Zelda",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "seen": [
+          [
+            "Zelda",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "missing": [],
+        "extra": []
+      },
+      "audit_log_excluded": {
+        "left": [
+          "assign_task_direct"
+        ],
+        "right": [
+          "assign_task_queued"
+        ]
+      }
+    },
+    {
+      "case": "different_task_ids",
+      "source": "live_runtime",
+      "seed": 11,
+      "policy": "t3",
+      "observer": "receiver",
+      "declared_equivalent": false,
+      "left_assignment": {
+        "Malika": "ISSUE-0001::review"
+      },
+      "right_assignment": {
+        "Malika": "ISSUE-0001::triage"
+      },
+      "left_claim_statuses": [
+        "success"
+      ],
+      "right_claim_statuses": [
+        "success"
+      ],
+      "identity_confidentiality": {
+        "status": "not_approved",
+        "reason": "tool equivalence was not declared; matching or differing observations are not approved as concealment of tool identity",
+        "declared_equivalent": false,
+        "authoritative_states_match": false,
+        "observations_equal": true,
+        "erased_state_difference": true,
+        "protected_names_left": [],
+        "protected_names_right": [],
+        "diff": ""
+      },
+      "task_state_left": {
+        "status": "fail",
+        "reason": "assignment section does not contain the declared task-state projection",
+        "required": [
+          [
+            "Malika",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "seen": [],
+        "missing": [
+          [
+            "Malika",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "extra": []
+      },
+      "task_state_right": {
+        "status": "fail",
+        "reason": "assignment section does not contain the declared task-state projection",
+        "required": [
+          [
+            "Malika",
+            "ISSUE-0001::triage"
+          ]
+        ],
+        "seen": [],
+        "missing": [
+          [
+            "Malika",
+            "ISSUE-0001::triage"
+          ]
+        ],
+        "extra": []
+      },
+      "audit_log_excluded": {
+        "left": [
+          "assign_task_direct"
+        ],
+        "right": [
+          "assign_task_queued"
+        ]
+      }
+    },
+    {
+      "case": "different_task_ids",
+      "source": "live_runtime",
+      "seed": 11,
+      "policy": "t4",
+      "observer": "receiver",
+      "declared_equivalent": false,
+      "left_assignment": {
+        "Malika": "ISSUE-0001::review"
+      },
+      "right_assignment": {
+        "Malika": "ISSUE-0001::triage"
+      },
+      "left_claim_statuses": [
+        "success"
+      ],
+      "right_claim_statuses": [
+        "success"
+      ],
+      "identity_confidentiality": {
+        "status": "not_approved",
+        "reason": "tool equivalence was not declared; matching or differing observations are not approved as concealment of tool identity",
+        "declared_equivalent": false,
+        "authoritative_states_match": false,
+        "observations_equal": false,
+        "erased_state_difference": false,
+        "protected_names_left": [],
+        "protected_names_right": [],
+        "diff": "--- left\n+++ right\n@@ -28,7 +28,7 @@\n - ISSUE-0002::implement: cost=70.00\n \n === CURRENT ASSIGNMENTS ===\n-- Malika: ISSUE-0001::review\n+- Malika: ISSUE-0001::triage\n \n === BLACKBOARD COMMUNICATIONS ===\n Blackboard 0:"
+      },
+      "task_state_left": {
+        "status": "pass",
+        "reason": "declared assignment projection matches the observation section",
+        "required": [
+          [
+            "Malika",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "seen": [
+          [
+            "Malika",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "missing": [],
+        "extra": []
+      },
+      "task_state_right": {
+        "status": "pass",
+        "reason": "declared assignment projection matches the observation section",
+        "required": [
+          [
+            "Malika",
+            "ISSUE-0001::triage"
+          ]
+        ],
+        "seen": [
+          [
+            "Malika",
+            "ISSUE-0001::triage"
+          ]
+        ],
+        "missing": [],
+        "extra": []
+      },
+      "audit_log_excluded": {
+        "left": [
+          "assign_task_direct"
+        ],
+        "right": [
+          "assign_task_queued"
+        ]
+      }
+    },
+    {
+      "case": "duplicate_claim",
+      "source": "live_runtime",
+      "seed": 11,
+      "policy": "t4",
+      "observer": "receiver",
+      "declared_equivalent": true,
+      "left_assignment": {
+        "Malika": "ISSUE-0001::review",
+        "Detra": "ISSUE-0001::review"
+      },
+      "right_assignment": {
+        "Malika": "ISSUE-0001::review",
+        "Detra": "ISSUE-0001::review"
+      },
+      "left_claim_statuses": [
+        "success",
+        "success"
+      ],
+      "right_claim_statuses": [
+        "success",
+        "success"
+      ],
+      "identity_confidentiality": {
+        "status": "pass",
+        "reason": "sanitized observations match and do not distinguish the protected tool names",
+        "declared_equivalent": true,
+        "authoritative_states_match": true,
+        "observations_equal": true,
+        "erased_state_difference": false,
+        "protected_names_left": [],
+        "protected_names_right": [],
+        "diff": ""
+      },
+      "task_state_left": {
+        "status": "pass",
+        "reason": "declared assignment projection matches the observation section",
+        "required": [
+          [
+            "Detra",
+            "ISSUE-0001::review"
+          ],
+          [
+            "Malika",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "seen": [
+          [
+            "Detra",
+            "ISSUE-0001::review"
+          ],
+          [
+            "Malika",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "missing": [],
+        "extra": []
+      },
+      "task_state_right": {
+        "status": "pass",
+        "reason": "declared assignment projection matches the observation section",
+        "required": [
+          [
+            "Detra",
+            "ISSUE-0001::review"
+          ],
+          [
+            "Malika",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "seen": [
+          [
+            "Detra",
+            "ISSUE-0001::review"
+          ],
+          [
+            "Malika",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "missing": [],
+        "extra": []
+      },
+      "audit_log_excluded": {
+        "left": [
+          "assign_task_direct",
+          "assign_task_queued"
+        ],
+        "right": [
+          "assign_task_queued",
+          "assign_task_direct"
+        ]
+      }
+    },
+    {
+      "case": "duplicate_claim",
+      "source": "live_runtime",
+      "seed": 11,
+      "policy": "t3",
+      "observer": "receiver",
+      "declared_equivalent": true,
+      "left_assignment": {
+        "Malika": "ISSUE-0001::review",
+        "Detra": "ISSUE-0001::review"
+      },
+      "right_assignment": {
+        "Malika": "ISSUE-0001::review",
+        "Detra": "ISSUE-0001::review"
+      },
+      "left_claim_statuses": [
+        "success",
+        "success"
+      ],
+      "right_claim_statuses": [
+        "success",
+        "success"
+      ],
+      "identity_confidentiality": {
+        "status": "pass",
+        "reason": "sanitized observations match and do not distinguish the protected tool names",
+        "declared_equivalent": true,
+        "authoritative_states_match": true,
+        "observations_equal": true,
+        "erased_state_difference": false,
+        "protected_names_left": [],
+        "protected_names_right": [],
+        "diff": ""
+      },
+      "task_state_left": {
+        "status": "fail",
+        "reason": "assignment section does not contain the declared task-state projection",
+        "required": [
+          [
+            "Detra",
+            "ISSUE-0001::review"
+          ],
+          [
+            "Malika",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "seen": [],
+        "missing": [
+          [
+            "Detra",
+            "ISSUE-0001::review"
+          ],
+          [
+            "Malika",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "extra": []
+      },
+      "task_state_right": {
+        "status": "fail",
+        "reason": "assignment section does not contain the declared task-state projection",
+        "required": [
+          [
+            "Detra",
+            "ISSUE-0001::review"
+          ],
+          [
+            "Malika",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "seen": [],
+        "missing": [
+          [
+            "Detra",
+            "ISSUE-0001::review"
+          ],
+          [
+            "Malika",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "extra": []
+      },
+      "audit_log_excluded": {
+        "left": [
+          "assign_task_direct",
+          "assign_task_queued"
+        ],
+        "right": [
+          "assign_task_queued",
+          "assign_task_direct"
+        ]
+      }
+    },
+    {
+      "case": "duplicate_claim",
+      "source": "live_runtime",
+      "seed": 11,
+      "policy": "t3",
+      "observer": "third",
+      "declared_equivalent": true,
+      "left_assignment": {
+        "Malika": "ISSUE-0001::review",
+        "Detra": "ISSUE-0001::review"
+      },
+      "right_assignment": {
+        "Malika": "ISSUE-0001::review",
+        "Detra": "ISSUE-0001::review"
+      },
+      "left_claim_statuses": [
+        "success",
+        "success"
+      ],
+      "right_claim_statuses": [
+        "success",
+        "success"
+      ],
+      "identity_confidentiality": {
+        "status": "pass",
+        "reason": "sanitized observations match and do not distinguish the protected tool names",
+        "declared_equivalent": true,
+        "authoritative_states_match": true,
+        "observations_equal": true,
+        "erased_state_difference": false,
+        "protected_names_left": [],
+        "protected_names_right": [],
+        "diff": ""
+      },
+      "task_state_left": {
+        "status": "pass",
+        "reason": "declared assignment projection matches the observation section",
+        "required": [
+          [
+            "Detra",
+            "ISSUE-0001::review"
+          ],
+          [
+            "Malika",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "seen": [
+          [
+            "Detra",
+            "ISSUE-0001::review"
+          ],
+          [
+            "Malika",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "missing": [],
+        "extra": []
+      },
+      "task_state_right": {
+        "status": "pass",
+        "reason": "declared assignment projection matches the observation section",
+        "required": [
+          [
+            "Detra",
+            "ISSUE-0001::review"
+          ],
+          [
+            "Malika",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "seen": [
+          [
+            "Detra",
+            "ISSUE-0001::review"
+          ],
+          [
+            "Malika",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "missing": [],
+        "extra": []
+      },
+      "audit_log_excluded": {
+        "left": [
+          "assign_task_direct",
+          "assign_task_queued"
+        ],
+        "right": [
+          "assign_task_queued",
+          "assign_task_direct"
+        ]
+      }
+    },
+    {
+      "case": "invalid_task_id",
+      "source": "live_runtime",
+      "seed": 11,
+      "policy": "t4",
+      "observer": "receiver",
+      "claim_statuses": [
+        "retry"
+      ],
+      "assignment": {},
+      "audit_tools": [
+        "assign_task_direct"
+      ],
+      "protected_names_in_observation": [],
+      "task_state": {
+        "status": "pass",
+        "reason": "declared assignment projection matches the observation section",
+        "required": [],
+        "seen": [],
+        "missing": [],
+        "extra": []
+      }
+    },
+    {
+      "case": "already_assigned",
+      "source": "live_runtime",
+      "seed": 11,
+      "policy": "t2",
+      "observer": "receiver",
+      "claim_statuses": [
+        "success",
+        "failed"
+      ],
+      "assignment": {
+        "Malika": "ISSUE-0001::review"
+      },
+      "audit_tools": [
+        "assign_task_direct",
+        "assign_task_queued"
+      ],
+      "protected_names_in_observation": [],
+      "task_state": {
+        "status": "pass",
+        "reason": "declared assignment projection matches the observation section",
+        "required": [
+          [
+            "Malika",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "seen": [
+          [
+            "Malika",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "missing": [],
+        "extra": []
+      }
+    },
+    {
+      "case": "nested_tool_name",
+      "source": "synthetic_fixture",
+      "note": "Not an LLM episode. The two strings differ only by the nested tool name.",
+      "identity_confidentiality": {
+        "status": "fail",
+        "reason": "sanitized observations still distinguish the two calls",
+        "declared_equivalent": true,
+        "authoritative_states_match": true,
+        "observations_equal": false,
+        "erased_state_difference": false,
+        "protected_names_left": [
+          "assign_task_direct"
+        ],
+        "protected_names_right": [
+          "assign_task_queued"
+        ],
+        "diff": "--- left\n+++ right\n@@ -1,3 +1,3 @@\n === CURRENT ASSIGNMENTS ===\n - Ada: ISSUE-0001::review\n-payload={\"action\":\"assign_task_direct\",\"task_id\":\"ISSUE-0001::review\"}\n+payload={\"action\":\"assign_task_queued\",\"task_id\":\"ISSUE-0001::review\"}"
+      },
+      "task_state_left": {
+        "status": "pass",
+        "reason": "declared assignment projection matches the observation section",
+        "required": [
+          [
+            "Ada",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "seen": [
+          [
+            "Ada",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "missing": [],
+        "extra": []
+      },
+      "task_state_right": {
+        "status": "pass",
+        "reason": "declared assignment projection matches the observation section",
+        "required": [
+          [
+            "Ada",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "seen": [
+          [
+            "Ada",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "missing": [],
+        "extra": []
+      },
+      "audit_log_excluded": {
+        "left": [],
+        "right": []
+      }
+    },
+    {
+      "case": "missing_assignment_placeholder",
+      "source": "synthetic_fixture",
+      "note": "Not an LLM episode. A heading without the authoritative pair.",
+      "task_state": {
+        "status": "fail",
+        "reason": "assignment section does not contain the declared task-state projection",
+        "required": [
+          [
+            "Ada",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "seen": [],
+        "missing": [
+          [
+            "Ada",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "extra": []
+      }
+    },
+    {
+      "case": "unequal_states_collapsed_observation",
+      "source": "synthetic_fixture",
+      "note": "Not an LLM episode. Distinct assignments were erased from both observations.",
+      "identity_confidentiality": {
+        "status": "not_approved",
+        "reason": "tool equivalence was not declared; matching or differing observations are not approved as concealment of tool identity",
+        "declared_equivalent": false,
+        "authoritative_states_match": false,
+        "observations_equal": true,
+        "erased_state_difference": true,
+        "protected_names_left": [],
+        "protected_names_right": [],
+        "diff": ""
+      },
+      "task_state_left": {
+        "status": "fail",
+        "reason": "assignment section does not contain the declared task-state projection",
+        "required": [
+          [
+            "Ada",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "seen": [],
+        "missing": [
+          [
+            "Ada",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "extra": []
+      },
+      "task_state_right": {
+        "status": "fail",
+        "reason": "assignment section does not contain the declared task-state projection",
+        "required": [
+          [
+            "Ada",
+            "ISSUE-0001::triage"
+          ]
+        ],
+        "seen": [],
+        "missing": [
+          [
+            "Ada",
+            "ISSUE-0001::triage"
+          ]
+        ],
+        "extra": []
+      },
+      "audit_log_excluded": {
+        "left": [],
+        "right": []
+      }
+    },
+    {
+      "case": "false_equivalence_declaration",
+      "source": "synthetic_fixture",
+      "note": "Not an LLM episode. Equivalence was declared for different assignment states.",
+      "identity_confidentiality": {
+        "status": "fail",
+        "reason": "declared equivalent but authoritative assignment projections differ",
+        "declared_equivalent": true,
+        "authoritative_states_match": false,
+        "observations_equal": false,
+        "erased_state_difference": false,
+        "protected_names_left": [],
+        "protected_names_right": [],
+        "diff": "--- left\n+++ right\n@@ -1,2 +1,2 @@\n === CURRENT ASSIGNMENTS ===\n-- Ada: ISSUE-0001::review\n+- Ada: ISSUE-0001::triage"
+      },
+      "task_state_left": {
+        "status": "pass",
+        "reason": "declared assignment projection matches the observation section",
+        "required": [
+          [
+            "Ada",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "seen": [
+          [
+            "Ada",
+            "ISSUE-0001::review"
+          ]
+        ],
+        "missing": [],
+        "extra": []
+      },
+      "task_state_right": {
+        "status": "pass",
+        "reason": "declared assignment projection matches the observation section",
+        "required": [
+          [
+            "Ada",
+            "ISSUE-0001::triage"
+          ]
+        ],
+        "seen": [
+          [
+            "Ada",
+            "ISSUE-0001::triage"
+          ]
+        ],
+        "missing": [],
+        "extra": []
+      },
+      "audit_log_excluded": {
+        "left": [],
+        "right": []
+      }
+    }
+  ]
+}

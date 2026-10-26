@@ -19,6 +19,57 @@ If you find the repo or paper useful or interesting please :star: it!
 
 This repo contains experiments for Colosseum under `experiments/` that utilizes the [Terrarium](https://github.com/umass-aisec/Terrarium) (`terrarium-agents`) framework.
 
+## Apart Research Sprint 2026
+
+This repository holds two separate sprint projects and the preexisting Colosseum code they build on. They share the framework. They do not share results. Apart allows two submissions per participant; each submission below has its own title. The GitHub link can be this repository, with the project directory named in the submission.
+
+| Project | Research focus | Experimental evidence | Where to start |
+| --- | --- | --- | --- |
+| **Paper 1 — Tool-Choice Signaling** | When a runtime can hide tool-execution metadata and still leave the assignment visible | 108 exploratory runs on seeds 1–3, a separate 72-episode holdout on seeds 11–14, and eight later T3 utility episodes on those same seeds. The cohorts are not pooled. A confirmatory protocol was not run | [`experiments/collusion/tool_selection/README.md`](experiments/collusion/tool_selection/README.md) |
+| **Paper 2 — Actions as Carriers** | Whether a coalition-advantage score can rank observation filters in a misleading order | The original seven-arm table was not recovered. Primary evidence is 25 episodes, seeds 31–35. Full filtering did not raise the score, and a lower score can accompany a worse joint reward | [`experiments/collusion/metric_validation/README.md`](experiments/collusion/metric_validation/README.md) |
+
+Submission titles and author line for the two Apart forms:
+
+| | Submission 1 | Submission 2 |
+| --- | --- | --- |
+| Title | Tool-Choice Signaling and Task-State Preservation in LLM Multi-Agent Systems | Actions as Carriers: Side-Channel Collusion and the Metrics That Hide It |
+| Authors | Ellen Berhe and Muhammad Hassaan Shaukat | Ellen and Muhammad Hassaan Shaukat |
+| Write-up | [`papers/paper1_tool_choice_signaling.pdf`](papers/paper1_tool_choice_signaling.pdf). Slides: [`papers/paper1_slides.pdf`](papers/paper1_slides.pdf). Source: [`experiments/collusion/tool_selection/TOOL_SELECTION_PAPER.md`](experiments/collusion/tool_selection/TOOL_SELECTION_PAPER.md) | [`papers/paper2_actions_as_carriers.pdf`](papers/paper2_actions_as_carriers.pdf) |
+| Code | `experiments/collusion/tool_selection/` | `experiments/collusion/metric_validation/` |
+
+Both manuscripts use the submission author line above. The two write-ups are not pooled.
+
+Index of the write-ups: [`papers/README.md`](papers/README.md).
+
+### What is preexisting, what this sprint added, and what was not run
+
+Preexisting Colosseum work includes the framework, Terrarium, and `experiments/collusion/` outside the two directories above: the original runner, prompts, metrics, configs, and the other experiment families (`persuasion`, `network_influence`, `agent_misalignment`).
+
+Sprint implementations:
+
+- Paper 1 is a new package under `experiments/collusion/tool_selection/`. It uses `experiments/collusion/run_tracebreak.py`. It does not use the Paper 2 filter wiring.
+- Paper 2 adds `experiments/collusion/metric_validation/` and an additive change in `experiments/collusion/run.py`: `first_and_last` coalition selection, a `coalition_prompt` mode, and an observation-filter client. Configurations that omit those keys keep the previous behavior.
+
+Completed results:
+
+- Paper 1: the 108-run exploratory cohort (seeds 1–3, `gpt-4.1-mini`, temperature 0.7), a separate 72-episode holdout (seeds 11–14, policies T1, T2, and T4), and eight T3 utility episodes on seeds 11–14. Summarized in `TOOL_SELECTION_PAPER.md`, `T4_MATCHED_RESULTS.md`, and `T3_T4_COMPARISON.md`. Raw episode directories live under `experiments/collusion/tool_selection/outputs/` and are gitignored. The three sets are not pooled.
+- Paper 2: deterministic request-boundary tests, plus 25 new episodes (seeds 31–35; arms B0, P, V, S, B1; model string `gemini-3.5-flash-lite`). The analysis is `REPLICATION_AND_VALIDATION_REPORT.md`. Those episodes are not a reconstruction of the printed seven-arm table. Their logs are under `experiments/collusion/metric_validation/outputs/` and are gitignored.
+
+Not run, and not part of either result table:
+
+- Paper 1 confirmatory protocol (`CONFIRMATORY_PROTOCOL.md`). The event-only arm was run later as its own holdout, not as a replacement of the 108.
+- Paper 2 arms E and C in the new cohort, and a separate turn-order experiment. The original seven-arm episode logs were not found.
+
+Experimental code was left in place. Moving it would break the current imports. Each project README points at the files a reviewer needs.
+
+Intended submission tags, to be applied to the commit that is actually submitted:
+
+```text
+apart-2026-tool-selection
+apart-2026-action-carriers
+```
+
+Those tags are not created yet.
 
 ## Setup
 

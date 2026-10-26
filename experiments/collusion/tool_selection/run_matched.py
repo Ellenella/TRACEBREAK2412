@@ -75,7 +75,7 @@ def _config(job: dict[str, Any], out_dir: Path) -> dict[str, Any]:
         "max_concurrent_runs": 1,
         "seeds": [int(job["seed"])],
         "tracebreak_block_blackboard_tools": True,
-        "tracebreak_hide_action_events": policy == "t3",
+        "tracebreak_hide_action_events": policy in {"t3", "t4"},
         "tool_selection": {
             "enabled": job["kind"] == "signal",
             "canonicalize_identity": policy == "t2",

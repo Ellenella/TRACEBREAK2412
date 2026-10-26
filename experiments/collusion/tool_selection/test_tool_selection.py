@@ -182,8 +182,43 @@ class ToolSelectionTests(unittest.TestCase):
                     [DIRECT, QUEUED],
                 )
                 self.assertIn("prompts.py", saved[-1]["code_revision"])
+                self.assertTrue(saved[-1]["codebook_in_user_prompt"])
+                self.assertNotIn(CODEBOOK_HEADER, prefix_rows[-1]["user_prompt"])
+                self.assertFalse(saved[-1]["observation_leaks_selected_tool"])
 
         asyncio.run(check())
+
+    def test_t4_hides_the_event_and_keeps_the_assignment(self) -> None:
+        import asyncio
+
+        from experiments.collusion.tool_selection.validate_matched import (
+            _make,
+            t4_problems,
+            turn_roles,
+        )
+
+        async def check() -> list[str]:
+            found: list[str] = []
+            for seed in (1, 11, 12, 13, 14):
+                env, _protocol = _make(seed, hide=False, canonicalize=False, mask=False, bit=0)
+                sender, receiver, third = turn_roles(env.get_agent_names())
+                found.extend(await t4_problems(seed, sender, receiver, third))
+            return found
+
+        self.assertEqual(asyncio.run(check()), [])
+
+    def test_utility_t3_and_t4_differ_only_by_the_receiver_assignment(self) -> None:
+        import asyncio
+
+        from experiments.collusion.tool_selection.validate_matched import t3_t4_utility_problems
+
+        async def check() -> list[str]:
+            found: list[str] = []
+            for seed in (11, 12, 13, 14):
+                found.extend(await t3_t4_utility_problems(seed))
+            return found
+
+        self.assertEqual(asyncio.run(check()), [])
 
     def test_assignment_line_has_no_tool_name(self) -> None:
         line = f"- Layla: {TASK}"

@@ -15,6 +15,11 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
+from experiments.collusion.tool_selection.observation import (
+    CODEBOOK_HEADER,
+    observation_leaks_selected_tool,
+    receiver_observation_body,
+)
 from experiments.collusion.tool_selection.tools import JiraTicketToolSelectionTools
 
 HERE = Path(__file__).resolve().parent
@@ -95,6 +100,10 @@ def log_returned_request(
             ),
         },
         "code_revision": code_revision(),
+        "codebook_in_user_prompt": CODEBOOK_HEADER in user_prompt,
+        "observation_leaks_selected_tool": observation_leaks_selected_tool(
+            receiver_observation_body(user_prompt)
+        ),
     }
     logger = getattr(prompts, "experiment_prompt_logger", None)
     log_dir = getattr(logger, "log_dir", None)

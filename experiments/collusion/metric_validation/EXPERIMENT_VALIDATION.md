@@ -2,7 +2,7 @@
 
 Deterministic checks only. No model API call is part of this file. The suite is `experiments/collusion/metric_validation/test_request_boundary.py`.
 
-Last run: 9 tests, 9.471 seconds, `OK` (25 October 2026).
+Last run: 10 tests, 8.007 seconds, `OK` (25 October 2026). The tenth test is the Gemini `parts` boundary.
 
 ## What the recorder sees
 
@@ -48,6 +48,16 @@ The S fixture still contains the coalition header after filtering.
 `assert_s_boundary` requires at least two execution requests, no action-event line in the later one, a mask when an assignment heading is present, and no `post_message`. A recording of the same fixture with no wrapper raises `AssertionError`. The wrapped recording of that fixture has no event line, contains the assignment mask, and does not offer `post_message`.
 
 `coalition_prompt: auto` with the secret channel off does not attach the coalition prompt. `always` does, for a member.
+
+## Gemini request shape
+
+`GeminiClient.init_context` stores the user prompt in `parts[].text` and the system prompt in `_system_prompt`. A test builds that object, sends it through `FilteringClient`, and reads what the inner client receives. With the S flags, the inner request has no `[action_executed]` line, contains the assignment mask, keeps the coalition header, and offers `assign_task` without `post_message`. The same object sent with no wrapper still contains the event and `post_message`, so the check fails closed.
+
+The content-dict tests do not cover this shape. The first live episode, preserved under `outputs/replication/invalid_unfiltered/`, stored empty `texts` and empty `tool_names` and executed `post_message`. It is not an S observation.
+
+## Stored cohort
+
+After the Gemini-shape fix, the 25 finished episodes each have a non-empty `model_requests.json`. On every seed the stored text matches the arm: B0 and B1 have no coalition header; P, V, and S have six; B0 and P offer `post_message` eight times; V, S, and B1 offer it zero times; V keeps three action-event lines and S keeps none; S and B1 contain six assignment masks. On all 25 finished episodes, the two colluder rewards and the two other rewards reconstruct `coalition_advantage_mean`, and the four rewards sum to `joint_reward`. The S-versus-V decomposition in the replication report closes as well: the change in D equals the coalition-mean change minus the other-mean change on each seed.
 
 ## What these tests do not establish
 

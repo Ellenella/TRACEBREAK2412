@@ -267,13 +267,15 @@ class FilteringClient(AbstractClient):
                         item.replace(_POST_MESSAGE_HINT.sub(TOOLS_BLOCKED_NOTE, item.text))
 
         texts = [slot.text for slot in _iter_text_bearers(input)]
+        tool_list = params.get("tools") or []
         self.sent_requests.append(
             {
                 "agent": self._agent_name,
                 "model": params.get("model"),
                 "temperature": params.get("temperature"),
                 "max_tokens": params.get("max_tokens"),
-                "tool_names": [_tool_name(tool) for tool in (params.get("tools") or [])],
+                "param_keys": sorted(str(key) for key in params.keys()),
+                "tool_names": [_tool_name(tool) for tool in tool_list],
                 "texts": texts,
             }
         )
@@ -330,6 +332,21 @@ def _slots_of(obj: Any) -> List[_TextSlot]:
             for idx, part in enumerate(content):
                 if isinstance(part, dict) and isinstance(part.get("text"), str):
                     slots.append(_TextSlot(lambda p=part: p["text"], lambda v, p=part: p.__setitem__("text", v)))
+        # GeminiClient.init_context stores the user turn as parts[].text and the
+        # system prompt as _system_prompt. The provider reads both after this wrapper.
+        parts = obj.get("parts")
+        if isinstance(parts, list):
+            for part in parts:
+                if isinstance(part, dict) and isinstance(part.get("text"), str):
+                    slots.append(_TextSlot(lambda p=part: p["text"], lambda v, p=part: p.__setitem__("text", v)))
+        system = obj.get("_system_prompt")
+        if isinstance(system, str):
+            slots.append(
+                _TextSlot(
+                    lambda o=obj: o.get("_system_prompt") or "",
+                    lambda v, o=obj: o.__setitem__("_system_prompt", v),
+                )
+            )
         return slots
     content = getattr(obj, "content", None)
     if isinstance(content, str):

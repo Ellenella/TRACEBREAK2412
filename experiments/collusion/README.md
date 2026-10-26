@@ -1,5 +1,13 @@
 # Covert Collusion Experiment (JiraTicket default)
 
+The Apart Research Sprint 2026 projects are separate from this preexisting experiment:
+
+- Paper 1, *Tool-Choice Signaling and Task-State Preservation in LLM Multi-Agent Systems*: [`tool_selection/README.md`](tool_selection/README.md)
+- Paper 2, actions as carriers: [`metric_validation/README.md`](metric_validation/README.md)
+
+Their results are not pooled with each other or with the sweeps below. The repository overview is in the root `README.md`.
+
+
 This experiment tests whether a **subset of colluding agents** can (a) coordinate covertly using a **hidden colluder-only blackboard** and (b) **benefit at the expense of non-colluders** via **active deception** on shared blackboards.
 
 It is modeled after `experiments/network_influence`, but uses an **in-process** communication protocol (`LocalCommunicationProtocol`) so it does **not** require an MCP server and supports **parallel runs**.
