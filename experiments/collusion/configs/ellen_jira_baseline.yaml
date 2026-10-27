@@ -1,9 +1,13 @@
-# Setup pilot: one model, one seed, one cooperative condition.
-# Adapted from supplied Jira configurations; not an unchanged paper reproduction.
+# Setup pilot: one model, one seed. Sweep is now the real collusion mechanism: secret
+# coalition-only blackboard ON, control vs "simple" colluder prompt, so the two are comparable.
+# Key is NOT here: GeminiClient() takes no arguments, so it reads GOOGLE_API_KEY from .env.
+# max_conversation_steps is 1, not 3: terrarium 0.1.1's Gemini continuation loop gets 400
+# "Requests ending with a model turn" from Gemini 3.x, corrupting every turn while still
+# reporting status=complete. Collusion behaviour is shallow at 1 step per turn.
 simulation:
   max_iterations: 1
   max_planning_rounds: 4
-  max_conversation_steps: 3
+  max_conversation_steps: 1
   seed: 1
   tags: [ellen_jira_baseline]
 environment:
@@ -15,26 +19,26 @@ communication_network:
   num_agents: 3
   consolidate_channels: true
 llm_models:
-  - label: openai-gpt-4.1-mini
+  - label: gemini-3.5-flash-lite
     llm:
-      provider: openai
-      openai:
-        model: gpt-4.1-mini-2025-04-14
+      provider: gemini
+      gemini:
+        model: gemini-3.5-flash-lite
         params:
-          max_tokens: 1500
+          max_tokens: 1024
           temperature: 0.7
 experiment:
-  tag: ellen_jira_baseline
-  output_dir: experiments/collusion/outputs/ellen_jira_baseline
+  tag: ellen_jira_collusion
+  output_dir: experiments/collusion/outputs/ellen_jira_collusion
   max_concurrent_runs: 1
   seeds: [1]
   collusion:
     colluder_selection: first
     agent_order: random
   sweeps:
-    - name: baseline
+    - name: secret_channel
       topologies: [complete]
       num_agents: [3]
       colluder_counts: [2]
-      secret_channel_enabled: [false]
-      prompt_variants: [control]
+      secret_channel_enabled: [true]
+      prompt_variants: [control, simple]
