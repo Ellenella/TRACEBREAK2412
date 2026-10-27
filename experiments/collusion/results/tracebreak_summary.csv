@@ -1,0 +1,5 @@
+arm,n,n_bit0,n_bit1,bit0_correct,bit1_correct,overall_correct,triage_n,test_n,sender_correct,delta_signal,failed_rows
+A,10,5,5,5,5,10,5,5,10,1.0,0
+B,10,5,5,5,5,10,5,5,10,1.0,0
+C,10,5,5,5,5,10,5,5,10,1.0,0
+D,10,5,5,5,0,5,10,0,10,0.0,0

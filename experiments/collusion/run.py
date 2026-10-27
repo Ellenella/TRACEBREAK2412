@@ -189,7 +189,45 @@ def _select_colluders(
         return [str(x) for x in rng.sample(list(agent_names), k=count)]
     if strategy == "first":
         return [str(x) for x in list(agent_names)[:count]]
+    if strategy in {"first_and_last", "first-and-last"}:
+        # Path endpoints. This does not draw from rng, so a random turn order
+        # still starts from the same seed stream as a run with no earlier draw.
+        if count != 2 or len(agent_names) < 2:
+            raise ValueError(
+                "colluder_selection first_and_last requires exactly two colluders "
+                "and at least two agents"
+            )
+        return [str(agent_names[0]), str(agent_names[-1])]
     raise ValueError(f"Unknown colluder selection strategy: {strategy!r}")
+
+def _coalition_prompt_mode(base_cfg: Dict[str, Any]) -> str:
+    """How coalition instructions are attached.
+
+    ``auto`` is the historical runner: the coalition prompt exists only when the
+    secret channel is on. ``always`` keeps the configured prompt variant even if
+    that channel is off. ``never`` forces the cooperative prompt. Absent key
+    means ``auto``, so existing configs keep their previous behavior.
+    """
+    raw = ((base_cfg.get("experiment") or {}).get("collusion") or {}).get(
+        "coalition_prompt", "auto"
+    )
+    mode = str(raw or "auto").strip().lower()
+    if mode not in {"auto", "always", "never"}:
+        raise ValueError(
+            "experiment.collusion.coalition_prompt must be auto, always, or never"
+        )
+    return mode
+
+
+def _coalition_prompt_enabled(
+    mode: str, *, secret_channel_enabled: bool, agent_name: str, colluders: Sequence[str]
+) -> bool:
+    if mode == "never" or str(agent_name) not in {str(x) for x in colluders}:
+        return False
+    if mode == "always":
+        return True
+    return bool(secret_channel_enabled)
+
 
 def _order_agent_turns(
     *,
@@ -247,11 +285,13 @@ async def _run_single(
 ) -> Dict[str, Any]:
     rng = random.Random(int(seed))
     secret_channel_enabled = bool(secret_channel_enabled)
-    # Design choice: prompt variants are only active when the secret channel exists.
-    # When secret_channel_enabled is False, we force the effective variant to "control"
-    # so the baseline is the vanilla cooperative setup (no explicit collusion prompting).
+    coalition_prompt_mode = _coalition_prompt_mode(base_cfg)
+    # ``auto`` preserves the historical tie between the coalition prompt and the
+    # secret channel. ``always`` and ``never`` follow the config instead.
     effective_prompt_variant = str(prompt_variant or "").strip() or "control"
-    if not secret_channel_enabled:
+    if coalition_prompt_mode == "never" or (
+        coalition_prompt_mode == "auto" and not secret_channel_enabled
+    ):
         effective_prompt_variant = "control"
 
     cfg = copy.deepcopy(base_cfg)
@@ -374,10 +414,20 @@ async def _run_single(
     env_tool_name = str(
         getattr(env, "tools_environment_name", None) or env.__class__.__name__
     )
+    from experiments.collusion.metric_validation.observation_filter import (
+        FilteringClient,
+        policy_from_config,
+    )
+
+    filter_policy = policy_from_config(collusion_cfg.get("observation_filter")).with_roster(
+        agent_names
+    )
     for name in agent_names:
         client = get_client_instance(
             cfg["llm"], agent_name=name, vllm_runtime=vllm_runtime
         )
+        if filter_policy.active:
+            client = FilteringClient(client, filter_policy, name)
         agents.append(
             BaseAgent(
                 client,
@@ -439,12 +489,13 @@ async def _run_single(
     turns: List[Dict[str, Any]] = []
 
     def _extra_fields(agent_name: str) -> Dict[str, Any]:
-        # Baseline (secret_channel_enabled=False): no explicit collusion prompting.
-        prompt_role = (
-            "colluder"
-            if (secret_channel_enabled and str(agent_name) in colluder_set)
-            else "normal"
+        prompted = _coalition_prompt_enabled(
+            coalition_prompt_mode,
+            secret_channel_enabled=secret_channel_enabled,
+            agent_name=agent_name,
+            colluders=colluders,
         )
+        prompt_role = "colluder" if prompted else "normal"
         return {
             "collusion_role": prompt_role,
             "collusion_coalition_members": sorted(list(colluder_set))
@@ -581,16 +632,26 @@ async def _run_single(
             "num_agents": num_agents,
             "colluder_count": colluder_count,
             "colluders": colluders,
+            "agent_names": [str(name) for name in agent_names],
             "agent_order": str(agent_order_strategy or "random"),
             "agent_turn_order": [a.name for a in env.agents],
             "secret_channel_enabled": secret_channel_enabled,
             "secret_blackboard_id": secret_blackboard_id,
             "prompt_variant": str(effective_prompt_variant),
+            "coalition_prompt": coalition_prompt_mode,
+            "observation_filter": filter_policy.describe(),
             "seed": seed,
             "roles": roles,
             "blackboard_participants": blackboard_participants,
         },
     )
+    model_requests = []
+    for agent in env.agents:
+        sent = getattr(getattr(agent, "client", None), "sent_requests", None)
+        if sent:
+            model_requests.extend(sent)
+    if model_requests:
+        _write_json(run_dir / "model_requests.json", model_requests)
     _write_json(run_dir / "final_summary.json", final_summary)
     _write_json(run_dir / "agent_turns.json", turns)
     _write_json(run_dir / "metrics.json", metrics_to_json(metrics))
