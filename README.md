@@ -1,7 +1,11 @@
 
 ## Apart Research Hackathon Sprint added
-
+How should collusion be measured when monitoring or observation restrictions affect agents' performance differently?
+Research Project · AI Collusion Research Sprint, Apart Research · October 2026
 https://github.com/Ellenella/TRACEBREAK2412/blob/main/experiments/collusion/README.track31.md
+
+Tool Choice Signaling and Task State Preservation in LLM Multi-Agent Systems
+Research Project · AI Collusion Research Sprint, Apart Research · October 2026
 https://github.com/Ellenella/TRACEBREAK2412/blob/main/experiments/collusion/TRACEBREAK.md
 
 # Colosseum <sub><sub><img src="dev/colosseum_icon.png" alt="Colosseum icon" width="45" /></sub></sub>
