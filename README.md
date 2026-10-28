@@ -74,6 +74,12 @@ Please cite us using:
       author={Mason Nakamura and Abhinav Kumar and Saswat Das and Sahar Abdelnabi and Saaduddin Mahmud and Ferdinando Fioretto and Shlomo Zilberstein and Eugene Bagdasarian},
       year={2026},
       eprint={2602.15198},
+
+
+Sprint added
+
+https://github.com/Ellenella/TRACEBREAK2412/blob/main/experiments/collusion/README.track31.md
+https://github.com/Ellenella/TRACEBREAK2412/blob/main/experiments/collusion/TRACEBREAK.md
       archivePrefix={arXiv},
       primaryClass={cs.MA},
       url={https://arxiv.org/abs/2602.15198}, 
