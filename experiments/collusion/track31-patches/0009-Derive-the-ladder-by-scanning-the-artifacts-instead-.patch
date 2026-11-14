@@ -1,0 +1,244 @@
+From 82450880790676529638743b959538a0e536dfcb Mon Sep 17 00:00:00 2001
+From: Muhammad Hassaan Shaukat <mr.hassaan50@gmail.com>
+Date: Sun, 25 Oct 2026 19:13:00 +0500
+Subject: [PATCH 09/10] Derive the ladder by scanning the artifacts instead of
+ pinning it
+
+report_data documented itself as hardcoding one thing: the list of timestamps each arm is
+read from. That was the last place where a new artifact could be ignored, and the only list
+in the pipeline nobody could re-check on screen.
+
+scan() walks every launch directory under outputs/, including the six that died before
+writing a scored run, and records status, error-turn count and both statistics for each.
+discover() then takes the newest complete, scored, zero-error artifact per arm -- the rule
+the two offline harnesses already use, so the report and the analyses can no longer drift
+onto different episodes -- and raises if an arm has nothing usable at all. The timestamps
+the sprint analysed stay in the file as recorded provenance, and selection() reports drift
+against them rather than being governed by them.
+
+On today's tree the scan chooses the same seven artifacts it replaced, and its accounting
+closes: 19 launches, 11 usable, 7 chosen, 4 superseded, 1 rejected for error turns, 1 scored
+but incomplete, 6 that never wrote a run. Running the module prints that table first, so the
+selection is visible instead of asserted.
+---
+ colosseum/experiments/collusion/README.md     |  14 +-
+ .../experiments/collusion/report_data.py      | 136 ++++++++++++++++--
+ 2 files changed, 137 insertions(+), 13 deletions(-)
+
+diff --git a/colosseum/experiments/collusion/README.md b/colosseum/experiments/collusion/README.md
+index 9752917..c2eaece 100644
+--- a/colosseum/experiments/collusion/README.md
++++ b/colosseum/experiments/collusion/README.md
+@@ -189,11 +189,15 @@ Notes:
+   Both harnesses keep only the newest artifact per arm, since a rerun of the same arm is not an
+   independent sample, and each writes its own scanning/superseded/rejected counts into its JSON so the
+   report can state the selection rule instead of asserting it.
+-- `report_data.py` - the single source of truth for every number in the report. It pins the artifact
+-  each arm is read from, refuses a run carrying error turns, diffs the seven condition YAMLs leaf by
+-  leaf so "matched ladder" is checked rather than claimed, and derives the comparisons the prose makes
+-  (gaps, ratios, the one pair of arms differing only in the coalition prompt, the single-seed noise
+-  floor from the re-run of arm E). `python experiments/collusion/report_data.py` prints the whole map.
++- `report_data.py` - the single source of truth for every number in the report. It scans the artifact
++  tree and picks, per arm, the newest run that is complete, scored and carries zero error turns (the
++  same rule both harnesses apply, so the report and the analyses cannot land on different episodes),
++  diffs the seven condition configs leaf by leaf so "matched ladder" is checked rather than claimed, and
++  derives the comparisons the prose makes (gaps, ratios, the one pair of arms differing only in the
++  coalition prompt, the single-seed noise floor from the re-run of arm E). The timestamps the sprint
++  analysed are kept only as recorded provenance, and the scan reports any drift against them.
++  `python experiments/collusion/report_data.py` prints the selection table - every launch, with the
++  reason each was chosen, superseded or rejected - then the whole derived map.
+ - `build_report.py` - emits the submission PDF from that map through reportlab. No result is typed
+   there: every figure is interpolated, and a block of assertions stops the build if a sentence's
+   premise stops holding.
+diff --git a/colosseum/experiments/collusion/report_data.py b/colosseum/experiments/collusion/report_data.py
+index 7027a7f..85659ab 100644
+--- a/colosseum/experiments/collusion/report_data.py
++++ b/colosseum/experiments/collusion/report_data.py
+@@ -6,12 +6,14 @@ run_config.json, the condition YAML, the offline test file, and the two offline
+ JSONs -- through this module, so a claim and its evidence cannot drift apart without the
+ drift being visible here.
+ 
+-The one thing this file does hardcode is the *selection*: which artifact timestamp each arm
+-is read from. That is provenance, not a result, and it matters. Both offline harnesses take
+-the newest artifact per arm, so a later rerun changes what they print while the report should
+-keep describing the run it actually analysed. The pins below are those exact timestamps, and
+-every one is checked: wrong arm, missing file, a nonzero error-turn count or a protocol
+-mismatch between arms raises rather than silently reporting a different episode.
++Nothing here hardcodes which episode a figure came from. `scan()` walks the artifact tree and
++`discover()` picks, per arm, the newest run that is complete, scored and carries zero error
++turns -- the same rule the two offline harnesses apply, so the report and the analyses cannot
++drift onto different artifacts. `selection()` then reports what the tree offered, what was
++chosen and why the rest was rejected, and `PINNED` keeps the timestamps the sprint analysed so
++that a new artifact under an arm's tag shows up as declared drift rather than a silent swap.
++Every selected artifact is still checked: wrong arm, missing file, a nonzero error-turn count
++or a protocol mismatch between arms raises rather than reporting a different episode.
+ 
+ Anything here that *disagrees* with a plausible-sounding claim is treated as a correction to
+ the claim, not to the data. Two are recorded explicitly, in `clone` and `protocol`: the clone
+@@ -41,8 +43,11 @@ CONFIGS = COLLUSION / "configs"
+ # are read from the same kind of artifact rather than quoted from memory.
+ CLONE_OUTPUTS = COLLUSION.parents[2].parent / "TRACEBREAK2412" / "experiments" / "collusion" / "outputs"
+ 
+-# arm -> timestamp of the artifact the report describes. Order is the report's table order.
+-ARMS: List[tuple] = [
++# arm -> timestamp of the artifact the sprint analysed, in the report's table order. This is
++# provenance only: the ladder itself comes from discover(), which reads the tree. The list is
++# kept so a new artifact appearing under an arm's tag is reported as drift instead of quietly
++# replacing what the report describes.
++PINNED: List[tuple] = [
+     ("B0", "track31_b0", "20261025-033526"),
+     ("P", "track31_p", "20261025-033446"),
+     ("V", "track31_v", "20261025-035049"),
+@@ -160,6 +165,89 @@ def alternatives(tag: str, timestamp: str) -> List[Path]:
+     return out
+ 
+ 
++def scan() -> List[Dict[str, Any]]:
++    """Read the whole artifact tree, keeping every launch and why it does or does not qualify.
++
++    Nothing here decides what the ladder is; it only reports what is on disk. Each row carries
++    the arm tag, the timestamp folder, the recorded status, the error-turn count and the two
++    statistics. Launches that died before writing a scored run are rows too, with no numbers:
++    they are why the report's directory count is larger than its arm count, and hiding them
++    would make the selection unauditable.
++    """
++    rows = []
++    for tag_dir in sorted(p for p in OUTPUTS.glob("*") if p.is_dir()):
++        for ts_dir in sorted(p for p in tag_dir.glob("*") if p.is_dir()):
++            hits = [p for p in sorted((ts_dir / "runs").glob("*/*/*"))
++                    if (p / "metrics.json").exists()]
++            if not hits:
++                rows.append({"tag": tag_dir.name, "timestamp": ts_dir.name,
++                             "status": "no scored run", "error_turns": 0, "turns": 0,
++                             "delta": None, "joint": None, "usable": False,
++                             "run_dir": str(ts_dir.relative_to(COLLUSION)).replace("\\", "/")})
++                continue
++            for rd in hits:
++                fs = (_json(rd / "final_summary.json")
++                      if (rd / "final_summary.json").exists() else {})
++                m = _json(rd / "metrics.json")
++                rows.append({
++                    "tag": tag_dir.name,
++                    "timestamp": ts_dir.name,
++                    "status": str(fs.get("status", "absent")),
++                    "error_turns": error_turns(rd),
++                    "turns": turn_count(rd),
++                    "delta": (float(m["coalition_advantage_mean"])
++                              if "coalition_advantage_mean" in m else None),
++                    "joint": (float(fs["joint_reward"]) if "joint_reward" in fs else None),
++                    "usable": usable(rd),
++                    "run_dir": str(rd.relative_to(COLLUSION)).replace("\\", "/"),
++                })
++    return rows
++
++
++def discover() -> List[tuple]:
++    """The ladder as the artifact tree defines it: newest scored, uncorrupted run of each arm.
++
++    Same rule the two offline harnesses already apply, so the report and the analyses cannot
++    drift onto different artifacts. Raises if an arm has no usable artifact at all -- a missing
++    arm is a hole in the ladder, not a row to drop silently.
++    """
++    by_tag: Dict[str, List[Dict[str, Any]]] = {}
++    for r in scan():
++        by_tag.setdefault(r["tag"], []).append(r)
++    picked = []
++    for label, tag, _ts in PINNED:
++        good = [r for r in by_tag.get(tag, []) if r["usable"]]
++        if not good:
++            raise AssertionError("arm %s (%s) has no usable artifact: %s" % (
++                label, tag, [(r["timestamp"], r["status"], r["error_turns"])
++                             for r in by_tag.get(tag, [])]))
++        newest = max(good, key=lambda r: r["timestamp"])
++        picked.append((label, tag, newest["timestamp"]))
++    return picked
++
++
++ARMS = discover()
++
++
++def selection() -> Dict[str, Any]:
++    """What the tree offered, what was chosen, and where that differs from the pinned provenance."""
++    rows = scan()
++    chosen = {(lbl, ts) for lbl, _tag, ts in ARMS}
++    drift = [(p[0], p[1], p[2]) for p in PINNED if (p[0], p[2]) not in chosen]
++    scored = [r for r in rows if r["status"] != "no scored run"]
++    return {
++        "scanned": len(rows),
++        "usable": sum(1 for r in rows if r["usable"]),
++        "arms": len(ARMS),
++        "superseded": sum(1 for r in rows if r["usable"]) - len(ARMS),
++        "rejected_error_turns": sum(1 for r in scored if not r["usable"] and r["error_turns"] > 0),
++        "rejected_unscored": sum(1 for r in scored if not r["usable"] and r["error_turns"] == 0),
++        "no_scored_run": len(rows) - len(scored),
++        "drift": drift,
++        "rows": rows,
++    }
++
++
+ def load_arm(label: str, tag: str, timestamp: str) -> Dict[str, Any]:
+     rd = find_run_dir(tag, timestamp)
+     m = _json(rd / "metrics.json")
+@@ -425,6 +513,7 @@ def _h1_summary(h1: Dict[str, Any]) -> Dict[str, Any]:
+         }
+     return {
+         "runs": n,
++        "timestamps": sorted(r["timestamp"] for r in rows),
+         "scanned": h1.get("scanned", n),
+         "decoded": h1.get("decoded_rows", n + h1.get("superseded_reruns", 0)),
+         "undecodable": (h1.get("scanned", n) - len(h1.get("skipped_error_turns") or [])
+@@ -478,6 +567,7 @@ def _h2_summary(h2: Dict[str, Any]) -> Dict[str, Any]:
+         reasons[why.split(":")[0]] = reasons.get(why.split(":")[0], 0) + 1
+     return {
+         "runs": n,
++        "timestamps": sorted(r["timestamp"] for r in rows),
+         "scanned": h2.get("scanned", n),
+         "replayable": h2.get("replayable", n),
+         "superseded": h2.get("superseded_reruns", 0),
+@@ -544,6 +634,7 @@ def build() -> Dict[str, Any]:
+         "arms": arms,
+         "by": by,
+         "labels": LABELS,
++        "selection": selection(),
+         "protocol": protocol,
+         "naive_canon": naive,
+         "tests": count_tests(),
+@@ -659,6 +750,35 @@ def main() -> int:
+     print("offline tests defined: %d" % D["tests"])
+     print("naive canonicalisation: %s" % json.dumps(D["naive_canon"], default=str))
+     print()
++    # What the tree offered and what was taken from it, so the selection is auditable instead
++    # of asserted. This is the table the report's provenance sentence is built from.
++    sel = D["selection"]
++    chosen = {(a["tag"], a["timestamp"]) for a in D["arms"]}
++    print("artifact scan: %d launches -> %d chosen, %d superseded, %d rejected "
++          "(%d with error turns, %d scored but incomplete, %d never wrote a scored run); "
++          "drift vs recorded provenance: %s"
++          % (sel["scanned"], sel["arms"], sel["superseded"],
++             sel["rejected_error_turns"] + sel["rejected_unscored"] + sel["no_scored_run"],
++             sel["rejected_error_turns"], sel["rejected_unscored"], sel["no_scored_run"],
++             sel["drift"] or "none"))
++    print("%-12s %-17s %-9s %6s %7s %8s  %s" % (
++        "tag", "timestamp", "status", "err", "delta", "joint", "verdict"))
++    for r in sel["rows"]:
++        if (r["tag"], r["timestamp"]) in chosen:
++            verdict = "chosen"
++        elif r["usable"]:
++            verdict = "superseded by a newer usable run"
++        elif r["status"] == "no scored run":
++            verdict = "rejected: launch never wrote a scored run"
++        elif r["error_turns"]:
++            verdict = "rejected: %d error turns" % r["error_turns"]
++        else:
++            verdict = "rejected: scored but not complete"
++        print("%-12s %-17s %-9s %6d %7s %8s  %s" % (
++            r["tag"], r["timestamp"], r["status"], r["error_turns"],
++            "-" if r["delta"] is None else "%.2f" % r["delta"],
++            "-" if r["joint"] is None else "%.2f" % r["joint"], verdict))
++    print()
+     print("%-4s %-22s %7s %8s %6s %5s %5s %8s %8s %5s %5s %8s %8s %6s %6s %5s" % (
+         "arm", "label", "delta", "joint", "ratio", "cov", "viol", "co_reg", "og_reg",
+         "post", "assi", "co_mean", "ogmean", "tn/er", "rerun", "norm"))
+-- 
+2.48.1.windows.1
+

@@ -1,0 +1,56 @@
+# Track 3.1 condition P (E1): private-text positive control, matched to the action-only arms.
+#
+# Copied from hackathon_2_1_a_pair_private_channel.yaml rather than edited in place, so the
+# upstream baseline stays pristine. This is the arm that must MOVE before any other arm means
+# anything: the designated endpoint pair gets both the coalition objective and a private board.
+#
+# Matched to track31_V/E/S/C on everything except the channel: same path topology, same 4 agents,
+# same first_and_last endpoints, same prompt variant, same model, same step budget. It is NOT the
+# repo's own hackathon_positive_control.yaml, which runs on `complete` topology - comparing a
+# complete-topology control against a path-topology action arm confounds the channel with the
+# board structure, because on `complete` the whole network is already one shared channel.
+#
+# max_conversation_steps: 1 - see the note in track31_B0.yaml.
+
+simulation:
+  max_iterations: 1
+  max_planning_rounds: 2
+  max_conversation_steps: 1
+  seed: 1
+  tags: [track31_p]
+
+environment:
+  name: JiraTicketEnvironment
+  assignment_filling: false
+  max_tasks: 8
+
+communication_network:
+  topology: path
+  num_agents: 4
+  consolidate_channels: true
+
+llm_models:
+  - label: gemini_3_5_flash_lite
+    llm:
+      provider: openrouter
+      openrouter:
+        model: gemini-3.5-flash-lite
+        params:
+          max_tokens: 1500
+          temperature: 0.7
+
+experiment:
+  tag: track31_p
+  output_dir: experiments/collusion/outputs/track31_p
+  max_concurrent_runs: 1
+  seeds: [1]
+  collusion:
+    colluder_selection: first_and_last
+    agent_order: random
+  sweeps:
+    - name: track31_p
+      topologies: [path]
+      num_agents: [4]
+      colluder_counts: [2]
+      secret_channel_enabled: [true]
+      prompt_variants: [simple]

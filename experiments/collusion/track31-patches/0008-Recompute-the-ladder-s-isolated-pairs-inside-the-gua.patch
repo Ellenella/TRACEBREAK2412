@@ -1,0 +1,67 @@
+From 592e02bba77c82fee392b9f379864a316668bd0d Mon Sep 17 00:00:00 2001
+From: Muhammad Hassaan Shaukat <mr.hassaan50@gmail.com>
+Date: Sun, 25 Oct 2026 18:25:22 +0500
+Subject: [PATCH 08/10] Recompute the ladder's isolated pairs inside the guard
+ block
+
+The guard checked the derived figures against themselves: prompt_pair was tested for the
+shape the prose expects, but never against the arm rows it is supposed to summarise, so
+replacing it with an arbitrary pair still produced a PDF. Found by injecting false premises
+one at a time and seeing which ones the build let through - one of twelve did.
+
+The block now re-derives the prompt-only and channel-only pairs from D["arms"] directly,
+using the same three fields the intervention is defined by, and requires section 5.3's named
+pair to be the unique one that falls out. It also pins two premises the prose states without
+qualification: that the two arms it compares carry "always" and "never" respectively, and
+that withdrawing the prompt moves the statistic and the group reward in the same direction,
+because the sentence reads "costs" and that sign is the only thing making it true.
+
+All twelve injections now abort the build, and the honest map still produces the same eight
+pages: extracted text byte-for-byte equal to the previous build, no unrendered entities, and
+no decimal token that does not trace to an artifact.
+---
+ .../experiments/collusion/build_report.py     | 19 +++++++++++++++++++
+ 1 file changed, 19 insertions(+)
+
+diff --git a/colosseum/experiments/collusion/build_report.py b/colosseum/experiments/collusion/build_report.py
+index 4b3d547..1c924df 100644
+--- a/colosseum/experiments/collusion/build_report.py
++++ b/colosseum/experiments/collusion/build_report.py
+@@ -38,6 +38,16 @@ V_OTHER_AGENTS = [n for n in D["outgroup_names"] if D["agent_peak_arm"][n] != "V
+ 
+ # The prose below states these outright. If an artifact stops supporting one of them, the build
+ # stops instead of printing a sentence that is no longer true.
++_ARMS = D["arms"]
++# Recomputed here from the arm rows rather than trusted from report_data, so a map that names a
++# pair cannot be wrong about that pair being the only one that isolates a factor.
++_PROMPT_ONLY = [(a["label"], b["label"]) for i, a in enumerate(_ARMS) for b in _ARMS[i + 1:]
++                if a["filter"] == b["filter"]
++                and a["secret_channel_enabled"] == b["secret_channel_enabled"]
++                and a["coalition_prompt"] != b["coalition_prompt"]]
++_CHANNEL_ONLY = [(a["label"], b["label"]) for i, a in enumerate(_ARMS) for b in _ARMS[i + 1:]
++                 if a["filter"] == b["filter"] and a["coalition_prompt"] == b["coalition_prompt"]
++                 and a["secret_channel_enabled"] != b["secret_channel_enabled"]]
+ for _ok, _what in [
+     (D["clone_same_run_id"], "the two clone episodes share one recorded run_id"),
+     (D["turn_order_identical"], "every arm shares one recorded turn order"),
+@@ -56,8 +66,17 @@ for _ok, _what in [
+     (D["noncoalition_mean_peak"] == "V", "V is where the non-coalition mean is highest"),
+     (D["coalition_prompt"]["B0"] == "never" and D["coalition_prompt"]["P"] != "never",
+      "B0 is the unprompted arm the rest of the ladder is measured against"),
++    (len(D["prompt_pair"]) == 2 and len(set(D["prompt_pair"])) == 2
++     and sorted(D["prompt_pair_prompts"]) == ["always", "never"],
++     "section 5.3 can name two distinct arms that differ only in whether the prompt is there"),
++    (D["prompt_pair_delta_gain"] > 0 and D["prompt_pair_joint_gain"] > 0,
++     "withdrawing the prompt lowers both the statistic and group reward, which is how 5.3 reads them"),
+     (len(D["channel_only_pairs"]) == 0,
+      "no two arms change the secret channel and nothing else, as 5.2 says"),
++    (_CHANNEL_ONLY == [], "recomputing the channel-only pairs from the arm rows still finds none"),
++    (len(_PROMPT_ONLY) == 1 and {frozenset(p) for p in _PROMPT_ONLY}
++     == {frozenset(D["prompt_pair"])},
++     "section 5.3's pair is the one the arm rows single out, and it is unique"),
+     (set(l for l, _v in D["normalized_nonzero_arms"]) == set(D["full_coverage_arms"]),
+      "the only arms with a non-zero normalized score are the ones with full coverage"),
+     (H1["scanned"] == len(H1["skipped_error_turns"]) + H1["undecodable"] + H1["decoded"]
+-- 
+2.48.1.windows.1
+

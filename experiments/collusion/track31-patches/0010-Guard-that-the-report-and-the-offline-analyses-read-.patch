@@ -1,0 +1,40 @@
+From 3f82d17cfb1262ab06a2684d577ef3dffb6acb68 Mon Sep 17 00:00:00 2001
+From: Muhammad Hassaan Shaukat <mr.hassaan50@gmail.com>
+Date: Sun, 25 Oct 2026 19:13:00 +0500
+Subject: [PATCH 10/10] Guard that the report and the offline analyses read the
+ same episodes
+
+Two premises the new scan makes checkable. The selection's own counts have to close over
+chosen, superseded and every rejection class, and the seven artifacts the tables describe
+must be exactly the seven the two harnesses analysed -- a report that interpolates the
+newest run while quoting decode and replay numbers from an older one would otherwise be
+internally consistent and wrong.
+
+Both fire when broken: two off by one in the counts, six timestamps in the harness summary,
+an altered timestamp. Honest rebuild still emits the same eight pages, extracted text
+identical.
+---
+ colosseum/experiments/collusion/build_report.py | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/colosseum/experiments/collusion/build_report.py b/colosseum/experiments/collusion/build_report.py
+index 1c924df..1f8d640 100644
+--- a/colosseum/experiments/collusion/build_report.py
++++ b/colosseum/experiments/collusion/build_report.py
+@@ -49,6 +49,13 @@ _CHANNEL_ONLY = [(a["label"], b["label"]) for i, a in enumerate(_ARMS) for b in
+                  if a["filter"] == b["filter"] and a["coalition_prompt"] == b["coalition_prompt"]
+                  and a["secret_channel_enabled"] != b["secret_channel_enabled"]]
+ for _ok, _what in [
++    (D["selection"]["scanned"] == D["selection"]["usable"]
++     + D["selection"]["rejected_error_turns"] + D["selection"]["rejected_unscored"]
++     + D["selection"]["no_scored_run"]
++     and D["selection"]["usable"] == D["selection"]["arms"] + D["selection"]["superseded"],
++     "every launch directory on disk is accounted for as chosen, superseded or rejected"),
++    (sorted(a["timestamp"] for a in _ARMS) == sorted(H1["timestamps"]) == sorted(H2["timestamps"]),
++     "the report and both offline analyses read the same seven episodes"),
+     (D["clone_same_run_id"], "the two clone episodes share one recorded run_id"),
+     (D["turn_order_identical"], "every arm shares one recorded turn order"),
+     (D["s_coalition_equals_v"], "S's coalition mean is V's to the last digit"),
+-- 
+2.48.1.windows.1
+

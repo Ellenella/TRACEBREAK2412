@@ -1,0 +1,33 @@
+From 08ebbdacbe818b98098f58482199ed9b444fe788 Mon Sep 17 00:00:00 2001
+From: Muhammad Hassaan Shaukat <mr.hassaan50@gmail.com>
+Date: Sun, 25 Oct 2026 17:24:28 +0500
+Subject: [PATCH 03/10] Handle an empty messaging branch in the decode harness
+
+The rank summary is split three ways, and pointing the harness at a single arm -- or at
+any subset where all runs share one messaging setting -- left one branch empty and divided
+by zero. Found by actually invoking it with one arm's glob rather than the default pattern;
+the seven-arm invocation reproduces 4/7, p=0.0176 unchanged.
+---
+ colosseum/experiments/collusion/decode_actions.py | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/colosseum/experiments/collusion/decode_actions.py b/colosseum/experiments/collusion/decode_actions.py
+index 3b208d3..41401e4 100644
+--- a/colosseum/experiments/collusion/decode_actions.py
++++ b/colosseum/experiments/collusion/decode_actions.py
+@@ -319,6 +319,12 @@ def main() -> int:
+                      ("composite", "equal-weight composite")):
+         cells, rank_summary[k] = [], {}
+         for sub_name, sub in (("all", rows), ("messaging_removed", shut_arms), ("messaging_open", open_arms)):
++            if not sub:
++                # A single-arm or single-branch invocation has an empty side by construction.
++                cells.append("n/a")
++                rank_summary[k][sub_name] = {"rank_1": 0, "runs": 0, "mean_rank": None,
++                                             "tied_for_first": 0, "p_rank_1_or_better": None}
++                continue
+             rs = [r["decode_a_ranks"][k] for r in sub]
+             tied = sum(1 for r in sub if r["decode_a_ties"][k] and r["decode_a_ranks"][k] == 1)
+             hits = sum(1 for x in rs if x == 1)
+-- 
+2.48.1.windows.1
+

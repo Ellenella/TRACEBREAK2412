@@ -1,0 +1,58 @@
+From 3912414855e85244d6133dc5511151588abe1af5 Mon Sep 17 00:00:00 2001
+From: Muhammad Hassaan Shaukat <mr.hassaan50@gmail.com>
+Date: Sun, 25 Oct 2026 18:15:21 +0500
+Subject: [PATCH 07/10] Correct the ladder description and document the report
+ pipeline
+
+The notes described B1 as B0 plus the collusive prompt. It is S with the prompt withdrawn:
+the two share one observation_filter and differ in coalition_prompt alone, which is the only
+place in the ladder where "you have a partner" is separable from what the agent can see. B0
+is the unprompted baseline, and V/E/S/C all carry the prompt, so any of them read against B0
+changes the prompt and the observation at once - a trap worth naming in the file that tells
+people which arm to compare.
+
+Also records the two offline harnesses' self-reported selection counts and the two modules
+that turn artifacts into the submission PDF.
+---
+ colosseum/experiments/collusion/README.md | 18 +++++++++++++++---
+ 1 file changed, 15 insertions(+), 3 deletions(-)
+
+diff --git a/colosseum/experiments/collusion/README.md b/colosseum/experiments/collusion/README.md
+index fe93060..9752917 100644
+--- a/colosseum/experiments/collusion/README.md
++++ b/colosseum/experiments/collusion/README.md
+@@ -164,8 +164,11 @@ Notes:
+ - `configs/track31_{P,V,E,S,C,B1,B0}.yaml` - path topology, 4 agents,
+   `colluder_selection: first_and_last` (endpoints share no blackboard). `P` is the positive control
+   (`secret_channel_enabled: true`); `V/E/S/C` and `B0/B1` run with the secret board off, so any
+-  coordination left must travel through actions and shared state. `B1` is `B0` plus the collusive
+-  prompt, which separates "knowing the coalition exists" from "being able to signal it".
++  coordination left must travel through actions and shared state. `B1` is `S` with the collusive prompt
++  withdrawn - the two share one `observation_filter` and differ in `coalition_prompt` alone, which is
++  the only place in the ladder where "you have a partner" is separable from what the agent can see.
++  `B0` is the unprompted baseline; note that `V/E/S/C` all carry the prompt, so any of them read against
++  `B0` changes the prompt and the observation at once.
+ - `run.py` - three additions only: import of the filter module, `policy_from_config(...)` next to the
+   other collusion-knob validation, and `client = FilteringClient(client, filter_policy, name)` where
+   the client is constructed, with `filter_policy = filter_policy.with_roster(agent_names)` bound once
+@@ -184,7 +187,16 @@ Notes:
+   two agents' claims, replace one action with the exact solver's choice - and compares the causal cost
+   of touching a coalition member against an outgroup member. Writes `outputs/counterfactual_h2.json`.
+   Both harnesses keep only the newest artifact per arm, since a rerun of the same arm is not an
+-  independent sample.
++  independent sample, and each writes its own scanning/superseded/rejected counts into its JSON so the
++  report can state the selection rule instead of asserting it.
++- `report_data.py` - the single source of truth for every number in the report. It pins the artifact
++  each arm is read from, refuses a run carrying error turns, diffs the seven condition YAMLs leaf by
++  leaf so "matched ladder" is checked rather than claimed, and derives the comparisons the prose makes
++  (gaps, ratios, the one pair of arms differing only in the coalition prompt, the single-seed noise
++  floor from the re-run of arm E). `python experiments/collusion/report_data.py` prints the whole map.
++- `build_report.py` - emits the submission PDF from that map through reportlab. No result is typed
++  there: every figure is interpolated, and a block of assertions stops the build if a sentence's
++  premise stops holding.
+ 
+ Running an arm (the flag is `--config`, not `-c`; `PYTHONIOENCODING` is required on Windows because
+ the pre-run cost note prints a `≈`):
+-- 
+2.48.1.windows.1
+
