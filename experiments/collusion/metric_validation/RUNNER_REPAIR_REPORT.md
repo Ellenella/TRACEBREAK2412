@@ -46,3 +46,5 @@ E and C are not in the new cohort. Their copied configs still say `always`, with
 Prompts, scores, topologies, seeds in the yaml, temperature, and max tokens were not edited to make a configuration execute. The production runner still raises on provider `openrouter`. The replication launcher, not the yaml and not the shared runner, points a copy of the config at the installed Gemini client and records that substitution. See `run_replication.py`.
 
 `post_message` is a planning-phase tool in the environment. Its absence from an execution request is phase gating, not evidence that the filter ran.
+
+The installed Gemini client does not use an OpenAI `content` field. Its context is `parts[].text` plus `_system_prompt`. The wrapper now rewrites those fields before the inner client sees them. A request-boundary test uses `GeminiClient.init_context` and checks the inner client's copy. The first live episode was stored before that rewrite existed; it is kept under `outputs/replication/invalid_unfiltered/` and is not an S run.

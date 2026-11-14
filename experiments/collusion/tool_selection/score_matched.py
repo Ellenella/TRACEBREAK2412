@@ -74,7 +74,7 @@ def describe_run(run_dir: Path) -> dict[str, Any]:
     seed = config.get("seed")
     bit = None
     for part in name.split("_"):
-        if part in {"t1", "t2", "t3"}:
+        if part in {"t1", "t2", "t3", "t4"}:
             policy = part
         if part.startswith("seed") and part[4:].isdigit():
             seed = int(part[4:])

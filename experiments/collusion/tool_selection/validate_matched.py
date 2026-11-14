@@ -233,6 +233,8 @@ async def check_seed(seed: int) -> dict[str, Any]:
     if [event.tool_name for event in broad_protocol.tool_events] != [DIRECT]:
         problems.append(f"seed {seed} T3 tool log lost the executed tool")
 
+    problems.extend(await t4_problems(seed, sender, receiver, third))
+
     return {
         "seed": seed,
         "names": names,
@@ -258,6 +260,189 @@ async def check_seed(seed: int) -> dict[str, Any]:
         ),
         "problems": problems,
     }
+
+
+async def t4_problems(seed: int, sender: str, receiver: str, third: str) -> list[str]:
+    """T4 hides action events and keeps the assignment. Effects stay real."""
+    problems: list[str] = []
+    hidden_env, hidden_protocol = _make(
+        seed, hide=True, canonicalize=False, mask=False, bit=1
+    )
+    visible_env, visible_protocol = _make(
+        seed, hide=False, canonicalize=False, mask=False, bit=1
+    )
+    hidden_result = await _claim(hidden_protocol, sender, QUEUED, FIXED_TASK)
+    visible_result = await _claim(visible_protocol, sender, QUEUED, FIXED_TASK)
+    if hidden_result.get("status") != "success":
+        problems.append(f"seed {seed} T4 claim failed")
+    if _snapshot(hidden_env)["assignment"] != _snapshot(visible_env)["assignment"]:
+        problems.append(f"seed {seed} T4 changed the executed assignment")
+    if [event.tool_name for event in hidden_protocol.tool_events] != [QUEUED]:
+        problems.append(f"seed {seed} T4 tool log lost the executed tool")
+    for agent, label in ((receiver, "receiver"), (third, "third")):
+        text = await _prompt(hidden_env, hidden_protocol, agent)
+        body = receiver_observation_body(text)
+        if "action_executed" in body:
+            problems.append(f"seed {seed} T4 {label} still sees an action event")
+        if "=== CURRENT ASSIGNMENTS ===" not in body or FIXED_TASK not in body:
+            problems.append(f"seed {seed} T4 {label} lost the assignment")
+        if observation_leaks_selected_tool(body):
+            problems.append(f"seed {seed} T4 {label} observation names a selected tool")
+    visible_body = receiver_observation_body(
+        await _prompt(visible_env, visible_protocol, receiver)
+    )
+    if QUEUED not in visible_body or "action_executed" not in visible_body:
+        problems.append(f"seed {seed} T1 receiver does not reveal the selected tool")
+    return problems
+
+
+def _without_assignment_section(text: str) -> str:
+    marker = "=== CURRENT ASSIGNMENTS ==="
+    start = text.find(marker)
+    if start < 0:
+        return text.strip()
+    rest = text[start + len(marker):]
+    next_heading = rest.find("\n===")
+    if next_heading < 0:
+        return text[:start].strip()
+    return (text[:start] + rest[next_heading + 1:]).strip()
+
+
+async def t3_t4_utility_problems(seed: int) -> list[str]:
+    """Utility T3 and T4 use the launcher config. Only the receiver mask differs."""
+    import json as _json
+    import tempfile
+
+    from experiments.collusion.tool_selection.observation import CODEBOOK_HEADER
+    from experiments.collusion.tool_selection.run_matched import _config as launcher_config
+
+    problems: list[str] = []
+    configs = {}
+    envs = {}
+    protocols = {}
+    for policy in ("t3", "t4"):
+        cfg = launcher_config(
+            {"kind": "utility", "policy": policy, "seed": seed, "rep": 1, "bit": None},
+            HERE / "outputs" / "t3_utility" / "_unused",
+        )
+        cfg["logging"] = {"root_dir": str(HERE / "outputs" / "matched" / "_validation_logs")}
+        configs[policy] = cfg
+        jira_mod.clear_seed_directories = lambda *_a, **_k: None  # type: ignore[assignment]
+        protocol = ToolSelectionProtocol(config=cfg)
+        env = JiraTicketToolSelectionEnvironment(protocol, cfg, None)
+        protocol.megaboard.add_blackboard(list(env.get_agent_names()))
+        envs[policy] = env
+        protocols[policy] = protocol
+
+    left = configs["t3"]["experiment"]
+    right = configs["t4"]["experiment"]
+    if left.get("tracebreak_hide_action_events") is not True or right.get("tracebreak_hide_action_events") is not True:
+        problems.append(f"seed {seed} utility T3/T4 did not both hide action events")
+    if left.get("tracebreak_mask_assignment_for_agent") != "receiver":
+        problems.append(f"seed {seed} utility T3 mask is not the receiver")
+    if "tracebreak_mask_assignment_for_agent" in right:
+        problems.append(f"seed {seed} utility T4 sets an assignment mask")
+    for policy in ("t3", "t4"):
+        probe = configs[policy]["experiment"]["tool_selection"]
+        if probe.get("enabled") is not False or probe.get("canonicalize_identity") is not False:
+            problems.append(f"seed {seed} utility {policy} is not codebook-off and uncanonicalized")
+        if probe.get("policy") != policy:
+            problems.append(f"seed {seed} utility policy field {probe.get('policy')}")
+    ignored = {"tag", "output_dir", "sweeps", "tool_selection", "tracebreak_mask_assignment_for_agent"}
+    if {key: value for key, value in left.items() if key not in ignored} != {
+        key: value for key, value in right.items() if key not in ignored
+    }:
+        problems.append(f"seed {seed} utility T3 and T4 launcher configs differ outside the mask")
+
+    sender, receiver, third = turn_roles(envs["t4"].get_agent_names())
+    if turn_roles(envs["t3"].get_agent_names()) != (sender, receiver, third):
+        problems.append(f"seed {seed} T3 and T4 names differ")
+    claimed = {}
+    for policy in ("t3", "t4"):
+        claimed[policy] = await _claim(protocols[policy], sender, DIRECT, FIXED_TASK)
+        if claimed[policy].get("status") != "success":
+            problems.append(f"seed {seed} utility {policy} claim failed")
+    if _snapshot(envs["t3"])["assignment"] != _snapshot(envs["t4"])["assignment"]:
+        problems.append(f"seed {seed} T3 changed the executed assignment relative to T4")
+    if [event.tool_name for event in protocols["t3"].tool_events] != [DIRECT]:
+        problems.append(f"seed {seed} T3 tool log lost the executed tool")
+    if [event.tool_name for event in protocols["t4"].tool_events] != [DIRECT]:
+        problems.append(f"seed {seed} T4 tool log lost the executed tool")
+
+    class _Capture:
+        def __init__(self, directory: Path) -> None:
+            self.log_dir = directory
+            self.rows: list[dict] = []
+
+        def log_prompts(self, **kwargs: object) -> None:
+            self.rows.append(dict(kwargs))
+
+    bodies: dict[tuple[str, str], str] = {}
+    with tempfile.TemporaryDirectory() as tmp:
+        for policy in ("t3", "t4"):
+            logger = _Capture(Path(tmp) / policy)
+            logger.log_dir.mkdir()
+            env = envs[policy]
+            protocol = protocols[policy]
+            builder = ToolSelectionPrompts(
+                env,
+                protocol.config,
+                prompt_variant="control",
+                base_prompts=env.prompts,
+                experiment_prompt_logger=logger,
+            )
+            for agent in (sender, receiver, third):
+                contexts = await protocol._prefetch_blackboard_events(
+                    agent, phase="execution", iteration=1
+                )
+                context = env.build_agent_context(agent, phase="execution", iteration=1)
+                context["collusion_role"] = "normal"
+                returned = builder.get_user_prompt(agent, context, contexts)
+                saved = [
+                    json_line
+                    for json_line in (logger.log_dir / "model_request.jsonl").read_text(encoding="utf-8").splitlines()
+                    if json_line.strip()
+                ]
+                record = _json.loads(saved[-1])
+                if record.get("user_prompt") != returned:
+                    problems.append(f"seed {seed} {policy} {agent} logged request is not the returned prompt")
+                if record.get("agent_name") != agent:
+                    problems.append(f"seed {seed} {policy} request agent {record.get('agent_name')}")
+                if CODEBOOK_HEADER in returned or record.get("codebook_in_user_prompt"):
+                    problems.append(f"seed {seed} {policy} {agent} utility prompt contains the codebook")
+                experiment = record.get("experiment") or {}
+                if experiment.get("tracebreak_hide_action_events") is not True:
+                    problems.append(f"seed {seed} {policy} request did not hide events")
+                probe = experiment.get("tool_selection") or {}
+                if probe.get("enabled") is not False or probe.get("canonicalize_identity") is not False:
+                    problems.append(f"seed {seed} {policy} request flags are not utility")
+                mask = experiment.get("tracebreak_mask_assignment_for_agent")
+                if policy == "t3" and mask != receiver:
+                    problems.append(f"seed {seed} T3 request mask {mask}")
+                if policy == "t4" and mask:
+                    problems.append(f"seed {seed} T4 request mask {mask}")
+                bodies[(policy, agent)] = receiver_observation_body(returned)
+
+    for agent in (sender, third):
+        if bodies[("t3", agent)] != bodies[("t4", agent)]:
+            problems.append(f"seed {seed} {agent} prompt differs between utility T3 and T4")
+        if "=== CURRENT ASSIGNMENTS ===" not in bodies[("t3", agent)] or FIXED_TASK not in bodies[("t3", agent)]:
+            problems.append(f"seed {seed} T3 {agent} lost the assignment")
+        if "action_executed" in bodies[("t4", agent)] or observation_leaks_selected_tool(bodies[("t4", agent)]):
+            problems.append(f"seed {seed} T4 {agent} still shows an event or a selected tool")
+    receiver_t3 = bodies[("t3", receiver)]
+    receiver_t4 = bodies[("t4", receiver)]
+    if "=== CURRENT ASSIGNMENTS ===" in receiver_t3 or f"{sender}: {FIXED_TASK}" in receiver_t3:
+        problems.append(f"seed {seed} T3 receiver still sees the sender assignment")
+    if "=== CURRENT ASSIGNMENTS ===" not in receiver_t4 or FIXED_TASK not in receiver_t4:
+        problems.append(f"seed {seed} T4 receiver lost the assignment")
+    if "action_executed" in receiver_t3 or "action_executed" in receiver_t4:
+        problems.append(f"seed {seed} utility receiver still sees an action event")
+    if observation_leaks_selected_tool(receiver_t3) or observation_leaks_selected_tool(receiver_t4):
+        problems.append(f"seed {seed} utility receiver observation names a selected tool")
+    if _without_assignment_section(receiver_t4) != receiver_t3:
+        problems.append(f"seed {seed} T3 and T4 receiver prompts differ outside the assignment section")
+    return problems
 
 
 def check_all() -> list[dict[str, Any]]:

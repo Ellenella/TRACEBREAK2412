@@ -20,6 +20,58 @@ from pathlib import Path
 from experiments.collusion import run as runner
 
 
+class _RequestLog:
+    """Records the request the provider client receives, including unfiltered arms."""
+
+    def __init__(self, inner, agent_name: str | None = None):
+        self._inner = inner
+        self.agent_name = agent_name
+        self.sent_requests = []
+
+    def generate_response(self, input, params):
+        texts = []
+        for item in input or []:
+            if not isinstance(item, dict):
+                continue
+            if isinstance(item.get("content"), str):
+                texts.append(item["content"])
+            if isinstance(item.get("_system_prompt"), str):
+                texts.append(item["_system_prompt"])
+            for part in item.get("parts") or []:
+                if isinstance(part, dict) and isinstance(part.get("text"), str):
+                    texts.append(part["text"])
+        tools = params.get("tools") or []
+        names = []
+        for tool in tools:
+            if isinstance(tool, dict):
+                names.append(str(tool.get("name") or (tool.get("function") or {}).get("name") or ""))
+        self.sent_requests.append(
+            {
+                "agent": self.agent_name,
+                "model": params.get("model"),
+                "temperature": params.get("temperature"),
+                "max_tokens": params.get("max_tokens"),
+                "param_keys": sorted(str(key) for key in params.keys()),
+                "tool_names": names,
+                "texts": texts,
+            }
+        )
+        return self._inner.generate_response(input, params)
+
+    def __getattr__(self, name):
+        return getattr(self._inner, name)
+
+
+_ORIGINAL_GET_CLIENT = runner.get_client_instance
+
+
+def _logged_client(*args, **kwargs):
+    return _RequestLog(_ORIGINAL_GET_CLIENT(*args, **kwargs), kwargs.get("agent_name"))
+
+
+runner.get_client_instance = _logged_client
+
+
 ROOT = Path(__file__).resolve().parent
 CONFIG_DIR = ROOT / "configs"
 OUT = ROOT / "outputs" / "replication"
@@ -59,7 +111,20 @@ MAX_ATTEMPTS = 4
 
 def retryable(exc: BaseException) -> bool:
     text = f"{type(exc).__name__}: {exc}".lower()
-    return "429" in text or "resource_exhausted" in text or "quota" in text
+    needles = (
+        "429",
+        "resource_exhausted",
+        "quota",
+        "disconnect",
+        "timeout",
+        "timed out",
+        "503",
+        "502",
+        "500",
+        "unavailable",
+        "remoteprotocol",
+    )
+    return any(needle in text for needle in needles)
 
 
 def preserve_incomplete(dest: Path, tag: str) -> None:
@@ -134,9 +199,12 @@ async def main() -> None:
                     flush=True,
                 )
                 if retryable(exc) and attempt < MAX_ATTEMPTS:
-                    print(f"rate limit, waiting {PAUSE_S}s", flush=True)
+                    print(f"transient error, waiting {PAUSE_S}s", flush=True)
                     time.sleep(PAUSE_S)
                     continue
+                if retryable(exc):
+                    print(f"{index}/{len(planned)} {tag} failed after {MAX_ATTEMPTS} attempts", flush=True)
+                    break
                 print(f"{index}/{len(planned)} {tag} STOP", flush=True)
                 return
             print(f"{index}/{len(planned)} {tag} {status}", flush=True)

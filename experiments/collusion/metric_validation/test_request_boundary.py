@@ -47,6 +47,12 @@ class RecordingClient:
         for item in input:
             if isinstance(item, dict) and isinstance(item.get("content"), str):
                 texts.append(item["content"])
+            if isinstance(item, dict) and isinstance(item.get("_system_prompt"), str):
+                texts.append(item["_system_prompt"])
+            if isinstance(item, dict):
+                for part in item.get("parts") or []:
+                    if isinstance(part, dict) and isinstance(part.get("text"), str):
+                        texts.append(part["text"])
         tools = params.get("tools") or []
         names = []
         for tool in tools:
@@ -366,6 +372,42 @@ class RequestBoundaryTest(unittest.IsolatedAsyncioTestCase):
         self.assertNotIn("[action_executed]", sent_text)
         self.assertIn(ASSIGNMENT_MASK, sent_text)
         self.assertNotIn("post_message", wrapped.sent_requests[-1]["tool_names"])
+
+    def test_gemini_parts_are_filtered_before_the_inner_client(self) -> None:
+        from llm_server.clients.gemini_client import GeminiClient
+
+        context = GeminiClient.init_context("system stays", FIXTURE)
+        tools = [
+            {"type": "function", "function": {"name": "post_message"}},
+            {"type": "function", "function": {"name": "assign_task"}},
+        ]
+        raw = RecordingClient()
+        raw.generate_response(context, {"model": "m", "temperature": 0.7, "max_tokens": 1500, "tools": tools})
+        self.assertIn("[action_executed]", _texts(raw.sent[-1]))
+        self.assertIn("post_message", raw.sent[-1]["tool_names"])
+        inner = RecordingClient()
+        wrapped = FilteringClient(
+            inner,
+            policy_from_config(
+                {
+                    "block_post_message": True,
+                    "hide_action_events": True,
+                    "mask_current_assignments": True,
+                }
+            ),
+            "Layla",
+        )
+        wrapped.generate_response(
+            context,
+            {"model": "gemini-3.5-flash-lite", "temperature": 0.7, "max_tokens": 1500, "tools": list(tools)},
+        )
+        seen = _texts(inner.sent[-1])
+        self.assertNotIn("[action_executed]", seen)
+        self.assertIn(ASSIGNMENT_MASK, seen)
+        self.assertIn(COALITION, seen)
+        self.assertNotIn("post_message", inner.sent[-1]["tool_names"])
+        self.assertIn("assign_task", inner.sent[-1]["tool_names"])
+        self.assertIn("parts", context[0])
 
     def test_auto_mode_still_strips_the_prompt_when_the_channel_is_off(self) -> None:
         self.assertFalse(
